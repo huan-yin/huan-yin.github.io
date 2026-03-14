@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://huan-yin.github.io/img/%E7%94%9F%E6%88%90%E7%AE%80%E5%8E%86%E7%BC%96%E8%BE%91%E7%BD%91%E7%AB%99.png">
 <meta property="article:published_time" content="2026-03-13T13:18:14.000Z">
-<meta property="article:modified_time" content="2026-03-13T13:32:54.095Z">
+<meta property="article:modified_time" content="2026-03-14T09:02:09.703Z">
 <meta property="article:author" content="李相越">
 <meta property="article:tag" content="网站生成">
 <meta name="twitter:card" content="summary_large_image">
@@ -328,7 +328,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          1.4k 字
         
       </span>
     
@@ -339,7 +339,7 @@
         
         
         
-          1 分钟
+          13 分钟
         
       </span>
     
@@ -383,7 +383,33 @@
             
               <div class="markdown-body">
                 
-                
+                <h1 id="gemini-canvas-生成简历网站">Gemini Canvas 生成简历网站</h1>
+<h2 id="Gemini-Canvas-是什么">Gemini Canvas 是什么</h2>
+<p>Gemini Canvas 是 Google Gemini 提供的一个强大的交互式工作区。当你需要开发小型应用原型时，Gemini Canvas 会在聊天界面右侧打开一个专属的宽屏面板，让你可以在不切换页面的情况下生成、预览、修改和导出内容。利用 Gemini Canvas 可以让我们所见即所得，随改随生成，快速得到符合我们需求的原型网站及可交互的可视化界面。</p>
+<h2 id="Gemini-Canvas-如何使用">Gemini Canvas 如何使用</h2>
+<p>在 Gemini 网页版底部的输入框下的工具菜单中，找到并点击 “Canvas” 图标，即可使用。在文本框中描述你的需求。你可以点击“添加文件”图标，上传文档、图片作为 Gemini Canvas 生成内容的参考基础。等待一会儿，生成的内容会占据屏幕右侧的大画板。</p>
+<h2 id="利用-Gemini-Canvas-制作简历网站">利用 Gemini Canvas 制作简历网站</h2>
+<p>我们可以从网上找到一份简历模板，在 Gemini Canvas 中点击“添加文件”将简历模板上传，然后输入提示词：根据简历模板生成简历编辑网站，保证简历的格式不变，具有导出PDF的功能。等待一会儿，我们就能看到生成的网站，根据生成效果再继续输入提示词改进网站的功能。</p>
+<h2 id="将生成的网站在本地运行">将生成的网站在本地运行</h2>
+<p>仔细观察 Gemini Canvas 生成的代码，我发现其可能生成 HTML 代码 或 React（框架采用lucide-react组件库）代码，如果是 HTML 代码，那我们复制就可以直接运行，但是如果是 React 代码，我们需要配置相关的环境运行。</p>
+<p><strong>第一步：创建 Vite + React 项目</strong><br>
+打开你的终端（Terminal）或命令行工具，运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm create vite@8.2.0 cv_create -- --template react<br><span class="hljs-built_in">cd</span> cv_create<br>npm install<br></code></pre></td></tr></table></figure>
+<p><strong>第二步：安装依赖</strong><br>
+React 代码使用了 <code>lucide-react</code> 图标库，并且依赖 Tailwind CSS 来实现漂亮的 UI：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 安装图标库</span><br>npm install lucide-react<br><br><span class="hljs-comment"># 安装 Tailwind CSS 及其相关依赖</span><br>npm install tailwindcss @tailwindcss/vite<br></code></pre></td></tr></table></figure>
+<p><strong>第三步：配置 Tailwind CSS</strong><br>
+打开项目根目录下的 <code>vite.config.js</code> 文件，将其修改为：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs javascript"><span class="hljs-keyword">import</span> &#123; defineConfig &#125; <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vite&quot;</span>;<br><span class="hljs-keyword">import</span> react <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@vitejs/plugin-react&quot;</span>;<br><span class="hljs-keyword">import</span> tailwindcss <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@tailwindcss/vite&quot;</span>; <span class="hljs-comment">// 👈 引入插件</span><br><br><span class="hljs-comment">// https://vitejs.dev/config/</span><br><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-title function_">defineConfig</span>(&#123;<br>  <span class="hljs-attr">plugins</span>: [<br>    <span class="hljs-title function_">react</span>(),<br>    <span class="hljs-title function_">tailwindcss</span>(), <span class="hljs-comment">// 👈 添加到插件列表</span><br>  ],<br>&#125;);<br></code></pre></td></tr></table></figure>
+<p>接着，打开 <code>src/index.css</code>，清空里面的内容，并加入 Tailwind 的基础指令：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-keyword">@import</span> <span class="hljs-string">&quot;tailwindcss&quot;</span>;<br></code></pre></td></tr></table></figure>
+<p><strong>第四步：替换代码</strong><br>
+打开 <code>src/App.jsx</code> 文件，把你提供的<strong>所有代码</strong>直接粘贴进去，替换掉原本的内容。</p>
+<p><strong>第五步：运行项目</strong><br>
+在终端中运行启动命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">npm run dev<br></code></pre></td></tr></table></figure>
+<p>终端会输出一个本地地址（通常是 <code>http://localhost:5173</code>）。在浏览器中打开这个地址，就能体验完整的交互式扩散模型演示了！</p>
+
                 
               </div>
             
