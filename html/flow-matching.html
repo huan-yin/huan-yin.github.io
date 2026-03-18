@@ -1,0 +1,333 @@
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>流匹配 (Flow Matching) 交互式可视化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: #f8fafc;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      canvas {
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        cursor: crosshair;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        background: transparent;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #2563eb;
+        cursor: pointer;
+        margin-top: -6px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      }
+      input[type="range"]::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px;
+        cursor: pointer;
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      input[type="range"]:focus {
+        outline: none;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+    <div class="max-w-4xl w-full">
+      <header class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-3">
+          流匹配可视化 (Flow Matching)
+        </h1>
+        <p class="text-gray-600 text-sm md:text-base">
+          在流匹配中，粒子通过学到的概率密度路径（Probability
+          Path）进行变换。<br />
+          最简单的形式是<b>条件流匹配</b>，粒子沿直线从噪声源奔向目标数据点。
+        </p>
+      </header>
+
+      <div
+        class="bg-white p-6 rounded-xl shadow-md mb-8 flex flex-col items-center border border-gray-100"
+      >
+        <div class="flex items-center w-full max-w-3xl mb-6">
+          <span class="text-gray-500 font-semibold w-24 text-right pr-4"
+            >噪声 (t=0)</span
+          >
+          <input
+            type="range"
+            id="timeSlider"
+            min="0"
+            max="100"
+            value="0"
+            class="flex-grow"
+          />
+          <span class="text-gray-800 font-bold w-24 text-left pl-4"
+            >数据 (t=1)</span
+          >
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-6 items-center">
+          <button
+            id="playBtn"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-full font-medium transition-colors shadow-md flex items-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                clip-rule="evenodd"
+                fill-rule="evenodd"
+              ></path>
+            </svg>
+            自动播放
+          </button>
+          <label
+            class="flex items-center gap-2 cursor-pointer bg-gray-50 px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+          >
+            <input
+              type="checkbox"
+              id="velCheckbox"
+              class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+            />
+            <span class="text-gray-700 font-medium select-none"
+              >显示每点速度 (Velocity Vectors)</span
+            >
+          </label>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center">
+        <div class="relative group">
+          <canvas
+            id="mainCanvas"
+            width="600"
+            height="600"
+            class="w-full max-w-[600px]"
+          ></canvas>
+          <div
+            class="absolute top-4 left-4 bg-white/80 backdrop-blur px-3 py-1 rounded-md text-xs font-mono text-gray-500 border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+          >
+            双月数据集 (Two Moons)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const MY_CONFIG = {
+        numSamples: 250,
+        plotRange: [-3, 3],
+        canvasSize: 600,
+        frames: 100,
+      };
+
+      let dataPts = [];
+      let noisePts = [];
+      let fmFrames = [];
+
+      const slider = document.getElementById("timeSlider");
+      const playBtn = document.getElementById("playBtn");
+      const velCheckbox = document.getElementById("velCheckbox");
+      const canvas = document.getElementById("mainCanvas");
+      const ctx = canvas.getContext("2d");
+
+      let isPlaying = false;
+      let playAnimationId = null;
+
+      function toPixel(val, isY = false) {
+        const range = MY_CONFIG.plotRange[1] - MY_CONFIG.plotRange[0];
+        const scale = MY_CONFIG.canvasSize / range;
+        if (isY)
+          return MY_CONFIG.canvasSize - (val - MY_CONFIG.plotRange[0]) * scale;
+        return (val - MY_CONFIG.plotRange[0]) * scale;
+      }
+
+      function initData() {
+        for (let i = 0; i < MY_CONFIG.numSamples; i++) {
+          const isOuter = i % 2 === 0;
+          const angle = Math.random() * Math.PI;
+          const r = 1 + (Math.random() - 0.5) * 0.15;
+          if (isOuter) {
+            dataPts.push([Math.cos(angle) * r, Math.sin(angle) * r]);
+          } else {
+            dataPts.push([1 - Math.cos(angle) * r, 0.5 - Math.sin(angle) * r]);
+          }
+        }
+
+        let mx = 0,
+          my = 0;
+        dataPts.forEach((p) => {
+          mx += p[0];
+          my += p[1];
+        });
+        mx /= dataPts.length;
+        my /= dataPts.length;
+
+        let vx = 0,
+          vy = 0;
+        dataPts.forEach((p) => {
+          vx += Math.pow(p[0] - mx, 2);
+          vy += Math.pow(p[1] - my, 2);
+        });
+        vx /= dataPts.length;
+        vy /= dataPts.length;
+        const sx = Math.sqrt(vx),
+          sy = Math.sqrt(vy);
+
+        for (let i = 0; i < dataPts.length; i++) {
+          dataPts[i] = [(dataPts[i][0] - mx) / sx, (dataPts[i][1] - my) / sy];
+        }
+
+        for (let i = 0; i < MY_CONFIG.numSamples; i++) {
+          let u = 0,
+            v = 0;
+          while (u === 0) u = Math.random();
+          while (v === 0) v = Math.random();
+          let z0 = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+          let z1 = Math.sqrt(-2.0 * Math.log(u)) * Math.sin(2.0 * Math.PI * v);
+          noisePts.push([z0, z1]);
+        }
+
+        dataPts.sort((a, b) => a[0] - b[0]);
+        noisePts.sort((a, b) => a[0] - b[0]);
+      }
+
+      function precomputeTrajectories() {
+        for (let k = 0; k <= MY_CONFIG.frames; k++) {
+          const t = k / MY_CONFIG.frames;
+          let frame_pts = [];
+          for (let i = 0; i < MY_CONFIG.numSamples; i++) {
+            frame_pts.push([
+              (1 - t) * noisePts[i][0] + t * dataPts[i][0],
+              (1 - t) * noisePts[i][1] + t * dataPts[i][1],
+            ]);
+          }
+          fmFrames.push(frame_pts);
+        }
+      }
+
+      function drawFrame(frameIndex) {
+        ctx.clearRect(0, 0, MY_CONFIG.canvasSize, MY_CONFIG.canvasSize);
+
+        ctx.strokeStyle = "#f1f5f9";
+        ctx.lineWidth = 1;
+        for (let i = MY_CONFIG.plotRange[0]; i <= MY_CONFIG.plotRange[1]; i++) {
+          ctx.beginPath();
+          ctx.moveTo(toPixel(i), 0);
+          ctx.lineTo(toPixel(i), MY_CONFIG.canvasSize);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, toPixel(i, true));
+          ctx.lineTo(MY_CONFIG.canvasSize, toPixel(i, true));
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(226, 232, 240, 0.6)";
+        for (let p of dataPts) {
+          ctx.beginPath();
+          ctx.arc(toPixel(p[0]), toPixel(p[1], true), 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        const showVel = velCheckbox.checked;
+        const currentPts = fmFrames[frameIndex];
+
+        for (let i = 0; i < MY_CONFIG.numSamples; i++) {
+          const px = currentPts[i][0];
+          const py = currentPts[i][1];
+          const canvasX = toPixel(px);
+          const canvasY = toPixel(py, true);
+
+          if (showVel) {
+            const vx = dataPts[i][0] - noisePts[i][0];
+            const vy = dataPts[i][1] - noisePts[i][1];
+            const vScale = 0.2;
+            const vTargetX = toPixel(px + vx * vScale);
+            const vTargetY = toPixel(py + vy * vScale, true);
+
+            ctx.strokeStyle = "rgba(37, 99, 235, 0.4)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(canvasX, canvasY);
+            ctx.lineTo(vTargetX, vTargetY);
+            ctx.stroke();
+
+            ctx.fillStyle = "rgba(37, 99, 235, 0.6)";
+            ctx.beginPath();
+            ctx.arc(vTargetX, vTargetY, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.fillStyle = "#ef4444";
+          ctx.beginPath();
+          ctx.arc(canvasX, canvasY, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function updateFromUI() {
+        drawFrame(parseInt(slider.value));
+      }
+      slider.addEventListener("input", () => {
+        if (isPlaying) togglePlay();
+        updateFromUI();
+      });
+      velCheckbox.addEventListener("change", updateFromUI);
+
+      function togglePlay() {
+        isPlaying = !isPlaying;
+        if (isPlaying) {
+          playBtn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg> 暂停`;
+          playBtn.classList.replace("bg-blue-600", "bg-orange-500");
+          playBtn.classList.replace("hover:bg-blue-700", "hover:bg-orange-600");
+          if (parseInt(slider.value) >= MY_CONFIG.frames) slider.value = 0;
+
+          function autoStep() {
+            if (!isPlaying) return;
+            let val = parseInt(slider.value);
+            if (val < MY_CONFIG.frames) {
+              slider.value = val + 1;
+              updateFromUI();
+              setTimeout(
+                () => (playAnimationId = requestAnimationFrame(autoStep)),
+                20,
+              );
+            } else {
+              togglePlay();
+            }
+          }
+          autoStep();
+        } else {
+          playBtn.innerHTML = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" fill-rule="evenodd"></path></svg> 自动播放`;
+          playBtn.classList.replace("bg-orange-500", "bg-blue-600");
+          playBtn.classList.replace("hover:bg-orange-600", "hover:bg-blue-700");
+          cancelAnimationFrame(playAnimationId);
+        }
+      }
+      playBtn.addEventListener("click", togglePlay);
+
+      function init() {
+        initData();
+        precomputeTrajectories();
+        drawFrame(0);
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    </script>
+  </body>
+</html>
