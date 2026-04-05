@@ -1,0 +1,1262 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/banner.png">
+  <link rel="icon" href="/img/banner.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="李相越">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="我的第二篇论文，利用大语言模型和经对比学习微调的Anomaly-aware CLIP 模型进行跨模态检索。生成模型以检索到的异常图像作为先验条件，在正常物体上合成带有相应缺陷的图像。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文二：融合缺陷检索和缺陷生成">
+<meta property="og:url" content="https://huan-yin.github.io/2026/04/05/%E8%AE%BA%E6%96%87%E4%BA%8C/index.html">
+<meta property="og:site_name" content="李相越的博客">
+<meta property="og:description" content="我的第二篇论文，利用大语言模型和经对比学习微调的Anomaly-aware CLIP 模型进行跨模态检索。生成模型以检索到的异常图像作为先验条件，在正常物体上合成带有相应缺陷的图像。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huan-yin.github.io/img/%E8%AE%BA%E6%96%87%E4%BA%8C/%E8%9E%8D%E5%90%88%E7%BC%BA%E9%99%B7%E6%A3%80%E7%B4%A2%E5%92%8C%E7%BC%BA%E9%99%B7%E7%94%9F%E6%88%90.png">
+<meta property="article:published_time" content="2026-04-05T10:40:02.000Z">
+<meta property="article:modified_time" content="2026-04-05T11:05:54.370Z">
+<meta property="article:author" content="李相越">
+<meta property="article:tag" content="Stable Diffusion">
+<meta property="article:tag" content="可控图像生成">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://huan-yin.github.io/img/%E8%AE%BA%E6%96%87%E4%BA%8C/%E8%9E%8D%E5%90%88%E7%BC%BA%E9%99%B7%E6%A3%80%E7%B4%A2%E5%92%8C%E7%BC%BA%E9%99%B7%E7%94%9F%E6%88%90.png">
+  
+  
+  
+  <title>论文二：融合缺陷检索和缺陷生成 - 李相越的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"huan-yin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":false,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="论文二：融合缺陷检索和缺陷生成"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-04-05 18:40" pubdate>
+          2026年4月5日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          74 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">论文二：融合缺陷检索和缺陷生成</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="论文二：缺陷检索和缺陷生成">论文二：缺陷检索和缺陷生成</h1>
+<blockquote>
+<p><strong>发表于：</strong> CVPR 2026 Findings</p>
+<p><strong>作者：</strong> Xiangyue Li*（苏州大学）, Xiaoyang Wang*（上海人工智能实验室）, Siyue Yao*（西交利物浦大学）, Mingjie Sun†（苏州大学 / 追觅科技）, Yupei Wu（Aqrose Technology）</p>
+</blockquote>
+<h2 id="摘要">摘要</h2>
+<p>传统异常数据生成方法仅能针对特定对象生成特定类型的异常，无法充分利用历史异常数据，因此不能在工业生产中生成从未出现过的异常类型。</p>
+<p>为克服上述局限，本文提出 <strong>Anomaly Agent 框架</strong>，由两个智能体协作完成&quot;生产前异常数据准备&quot;的全流程：</p>
+<ol>
+<li><strong>异常参考检索智能体（Anomaly Reference Retrieval Agent）：</strong> 利用大型语言模型（LLM）和异常感知 CLIP（Anomaly-aware CLIP）进行跨模态检索，将产品名称映射到历史异常图像库中的相关异常图像，指出潜在异常类型；</li>
+<li><strong>统一异常合成智能体（Unified Anomaly Synthesis Agent）：</strong> 以检索到的历史异常图像为参考，利用扩散模型生成目标产品的合成异常图像，并借助**保真度梯度细化（Fidelity Gradient Refinement）<strong>和</strong>真实性-保真度控制器（Plausibility-Fidelity Controller）**平衡生成异常的真实性与参考保真度。</li>
+</ol>
+<p>在 MVTec-AD 数据集上的实验表明，本方法使像素级平均精度（AP）提升了 <strong>6.2%</strong>，显著超越现有方法。</p>
+<h2 id="1-研究背景与动机">1. 研究背景与动机</h2>
+<h3 id="1-1-任务定义与挑战">1.1 任务定义与挑战</h3>
+<p>工业异常检测（Industrial Anomaly Detection）要求在现代生产系统中精确、及时地识别偏离正常模式的微小缺陷。该任务面临<strong>极度的数据不平衡</strong>：正常样本在生产数据中占据绝对主导，异常样本极为稀少。</p>
+<p>为缓解这一困难，研究者们提出利用<strong>数据增强</strong>和<strong>生成模型</strong>合成异常数据来显著提升检测精度<sup id="fnref:1" class="footnote-ref"><a href="#fn:1" rel="footnote"><span class="hint--top hint--rounded" aria-label="Bergmann, P., et al. (2019). MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection. _CVPR 2019_.">[1]</span></a></sup><sup id="fnref:2" class="footnote-ref"><a href="#fn:2" rel="footnote"><span class="hint--top hint--rounded" aria-label="Hu, J., et al. (2024). AnomalyDiffusion: Few-Shot Anomaly Image Generation with Diffusion Model. _AAAI 2024_.">[2]</span></a></sup>。</p>
+<h3 id="1-2-传统方法的三大缺陷">1.2 传统方法的三大缺陷</h3>
+<p>现有异常数据生成方法普遍遵循一个固定流程：先从生产过程中收集现有异常样本，再以这些样本训练生成模型产生合成异常数据。该流程存在以下关键限制：</p>
+<p><strong>缺陷一：依赖已知异常，无法&quot;预见&quot;新异常</strong><br>
+传统方法需要等到实际生产阶段才能收集到目标产品的异常样本，对于<strong>新产品上线前</strong>（pre-manufacturing）的阶段无法提前准备异常数据。换言之，无法生成&quot;从未出现过&quot;的异常。</p>
+<p><strong>缺陷二：历史数据利用率低下</strong><br>
+企业和研究机构往往积累了大量来自不同产品和类别的历史异常图像，但传统方法无法跨产品迁移这些知识，造成严重的数据浪费。</p>
+<p><strong>缺陷三：每类对象需单独训练生成模型</strong><br>
+传统生成方法需要为每种异常类别单独训练生成模型，在产品种类繁多的实际工厂场景中，训练和维护成本极高，可扩展性（scalability）很差。</p>
+<h3 id="1-3-核心洞察">1.3 核心洞察</h3>
+<p>本文的核心思路是：<strong>将历史异常图像库当作&quot;知识库&quot;（knowledge base），通过智能检索将其中与目标产品最相关的异常迁移到新产品上。</strong> 这样既无需目标产品的异常样本，也无需为每个类别单独训练生成模型，实现了真正意义上的&quot;生产前异常合成&quot;。</p>
+<h2 id="2-方法概述">2. 方法概述</h2>
+<h3 id="2-1-和之前方法的对比">2.1 和之前方法的对比</h3>
+<p><img src="/img/%E8%AE%BA%E6%96%87%E4%BA%8C/fig1_comparison.png" srcset="/img/loading.gif" lazyload alt="Figure 1: 框架对比"></p>
+<blockquote>
+<p><strong>(a)</strong> 传统方法：严重依赖在目标产品生产阶段收集的稀缺异常数据，需为每类异常单独训练生成模型，且无法在生产前生成未知异常；<strong>(b)</strong> Anomaly Agent：可在生产前即生成目标产品的异常图像，使用统一模型进行异常合成（无需单独训练），整个生成过程<strong>无需训练（training-free）</strong>，并能生成更加多样化的合成异常图像。</p>
+</blockquote>
+<h3 id="2-2-整体框架">2.2 整体框架</h3>
+<p><img src="/img/%E8%AE%BA%E6%96%87%E4%BA%8C/fig2_framework.png" srcset="/img/loading.gif" lazyload alt="Figure 2: 整体框架"></p>
+<blockquote>
+<p>整体框架由四部分组成：<strong>(a) 异常参考检索智能体</strong>：接收目标对象名称（如 “Plastic Bottle”），通过 LLM + Anomaly-aware CLIP 在历史异常图像库中检索最相关的参考异常图像；<strong>(b) 统一异常合成智能体</strong>：以检索到的参考图像和正常产品图像为输入，通过扩散模型 + VLM 采样选择，生成目标产品的合成异常图像；<strong>© Anomaly-aware Triplet Loss</strong>：用于微调 CLIP 图像编码器，增强其对异常区域的感知能力；<strong>(d) 保真度梯度细化模块（Fidelity Gradient Refinement）</strong>：在扩散推理阶段对潜变量施加梯度约束，在真实性（Plausibility）与保真度（Fidelity）之间动态平衡。</p>
+</blockquote>
+<p>整个框架包含两个串联的智能体模块：</p>
+<h3 id="2-3-模块一：异常参考检索智能体">2.3 模块一：异常参考检索智能体</h3>
+<h4 id="核心挑战：跨模态检索">核心挑战：跨模态检索</h4>
+<p>检索问题的输入是<strong>文本形式的目标产品名称</strong>（如 “bottle”、“cable”），输出是历史图像库中<strong>视觉相关的异常图像</strong>。这是一个跨模态（文本→图像）的检索任务，且难度在于：一个产品名称可以对应多种异常类型，需要 LLM 的语义推理能力来桥接文本与图像之间的语义差距。</p>
+<h4 id="两阶段检索流程">两阶段检索流程</h4>
+<p><strong>第一阶段：LLM 驱动的文本-文本检索</strong></p>
+<p>首先以 GPT-4o<sup id="fnref:3" class="footnote-ref"><a href="#fn:3" rel="footnote"><span class="hint--top hint--rounded" aria-label="OpenAI. (2024). GPT-4o Technical Report. _OpenAI_.">[3]</span></a></sup> 作为 LLM，利用检索增强生成（RAG）<sup id="fnref:4" class="footnote-ref"><a href="#fn:4" rel="footnote"><span class="hint--top hint--rounded" aria-label="Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. _NeurIPS 2020_.">[4]</span></a></sup> 技术，在由 Real-IAD<sup id="fnref:5" class="footnote-ref"><a href="#fn:5" rel="footnote"><span class="hint--top hint--rounded" aria-label="Wang, C., et al. (2024). Real-IAD: A Real-World Multi-View Dataset for Benchmarking Versatile Industrial Anomaly Detection. _CVPR 2024_.">[5]</span></a></sup> 数据集对象文本构成的知识库中，通过语义推理为目标产品名称匹配最相关的历史异常类型描述。具体来说：</p>
+<ul>
+<li>LLM 根据目标产品名称，推理该产品可能出现的异常类型（如腐蚀、划痕、孔洞）；</li>
+<li>同时检索知识库，找到历史数据中语义相近的异常描述。</li>
+</ul>
+<p><strong>第二阶段：Anomaly-aware CLIP 的文本-图像检索</strong></p>
+<p>以第一阶段得到的异常类型描述为查询，利用经过异常感知微调的 CLIP<sup id="fnref:6" class="footnote-ref"><a href="#fn:6" rel="footnote"><span class="hint--top hint--rounded" aria-label="Radford, A., et al. (2021). Learning Transferable Visual Models From Natural Language Supervision. _ICML 2021_.">[6]</span></a></sup> 模型，在历史异常图像库中进行跨模态相似度匹配，检索出视觉上最匹配的参考异常图像。</p>
+<h4 id="检索结果的-GPT-4o-质量评估">检索结果的 GPT-4o 质量评估</h4>
+<p>对于每张检索到的候选异常图像，进一步用 GPT-4o 的多模态理解能力进行质量评估：</p>
+<ol>
+<li>先询问 GPT-4o：“哪类对象可能具有该异常图像所示的缺陷？”</li>
+<li>计算 GPT-4o 预测的对象名称与目标产品名称之间的 CLIP 相似度作为匹配得分；</li>
+<li>取多张检索图像的平均匹配得分作为最终评估指标。</li>
+</ol>
+<h3 id="2-4-模块二：统一异常合成智能体">2.4 模块二：统一异常合成智能体</h3>
+<h4 id="基础架构：无训练的扩散模型推理">基础架构：无训练的扩散模型推理</h4>
+<p>本框架基于<strong>预训练的潜在扩散模型（LDM）</strong><sup id="fnref:7" class="footnote-ref"><a href="#fn:7" rel="footnote"><span class="hint--top hint--rounded" aria-label="Rombach, R., et al. (2022). High-Resolution Image Synthesis with Latent Diffusion Models. _CVPR 2022_.">[7]</span></a></sup>，整个异常合成过程<strong>无需针对目标产品进行任何微调或训练</strong>，充分利用了扩散模型强大的生成先验（generative prior）。</p>
+<p>核心思路是：将参考异常图像的视觉特征通过<strong>编码器 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi></mrow><annotation encoding="application/x-tex">\Phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Φ</span></span></span></span></strong> 压缩为特征嵌入，然后利用自定义文本嵌入（基于 ELITE<sup id="fnref:8" class="footnote-ref"><a href="#fn:8" rel="footnote"><span class="hint--top hint--rounded" aria-label="Wei, Y., et al. (2023). ELITE: Encoding Visual Concepts into Textual Embeddings for Customized Text-to-Image Generation. _ICCV 2023_.">[8]</span></a></sup>）将其与文本条件结合，引导扩散模型在目标产品正常图像上生成对应位置和外观的异常区域。</p>
+<p><strong>自定义文本嵌入：</strong></p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msup><mi>θ</mi><mo>∗</mo></msup><mo>=</mo><mtext>ELITE</mtext><mo stretchy="false">(</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><msup><mi>I</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msup><mo stretchy="false">)</mo><mo separator="true">,</mo><mi>θ</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\theta^* = \text{ELITE}(\Phi(I^{ref}), \theta)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7387em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7387em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">ELITE</span></span><span class="mopen">(</span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span><span class="mclose">)</span></span></span></span></span></p>
+<p>以参考异常图像编码 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><msup><mi>I</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Phi(I^{ref})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0991em;vertical-align:-0.25em;"></span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8491em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 为输入，通过 ELITE 映射网络优化文本嵌入 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi></mrow><annotation encoding="application/x-tex">\theta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6944em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">θ</span></span></span></span>，使该嵌入能够描述参考异常的视觉特征，随后作为扩散模型的文本条件注入生成过程。</p>
+<p><strong>异常掩码引导生成：</strong></p>
+<p>以异常掩码 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi></mrow><annotation encoding="application/x-tex">M</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span></span></span></span> 为空间约束，生成过程仅在掩码指定的区域内进行异常合成，掩码之外区域保持原始正常图像不变，保证生成结果的空间一致性。</p>
+<h4 id="保真度梯度细化模块（Fidelity-Gradient-Refinement）">保真度梯度细化模块（Fidelity Gradient Refinement）</h4>
+<p><strong>问题背景：</strong> 即便使用了参考异常的文本嵌入，扩散模型在推理时仍会受到自身生成先验的影响，可能产生视觉上不够忠实于参考异常的结果（即只学到了异常&quot;类型&quot;，而非具体视觉细节）。</p>
+<p><strong>解决方案：</strong> 在每一步去噪推理时，引入基于梯度的引导（gradient guidance），将当前去噪潜变量 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">z_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 拉向参考异常特征方向。</p>
+<p><strong>保真度损失：</strong></p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi mathvariant="script">L</mi><mrow><mi>f</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>l</mi><mi>i</mi><mi>t</mi><mi>y</mi></mrow></msub><mo>=</mo><mi mathvariant="normal">∥</mi><mo stretchy="false">(</mo><msub><mi>z</mi><mi>t</mi></msub><mo>⊙</mo><mi>M</mi><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><msup><mi>I</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msup><mo stretchy="false">)</mo><mo>⊙</mo><mi>M</mi><mo stretchy="false">)</mo><msub><mi mathvariant="normal">∥</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\mathcal{L}_{fidelity} = \| (z_t \odot M) - (\Phi(I^{ref}) \odot M) \|_2
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∥</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊙</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.1491em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">Φ</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8991em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.02778em;">r</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span></span></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⊙</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10903em;">M</span><span class="mclose">)</span><span class="mord"><span class="mord">∥</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>即当前去噪结果在掩码区域内与参考异常编码特征的 L2 距离。</p>
+<p><strong>潜变量更新：</strong></p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msubsup><mi>z</mi><mi>t</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msubsup><mo>=</mo><msub><mi>z</mi><mi>t</mi></msub><mo>−</mo><mi>η</mi><mo>⋅</mo><mi mathvariant="normal">∇</mi><msub><mi mathvariant="script">L</mi><mrow><mi>f</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>l</mi><mi>i</mi><mi>t</mi><mi>y</mi></mrow></msub></mrow><annotation encoding="application/x-tex">z&#x27;_t = z_t - \eta \cdot \nabla \mathcal{L}_{fidelity}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0489em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8019em;"><span style="top:-2.453em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6389em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.9694em;vertical-align:-0.2861em;"></span><span class="mord">∇</span><span class="mord"><span class="mord mathcal">L</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.10764em;">f</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span><span class="mord mathnormal mtight">i</span><span class="mord mathnormal mtight">t</span><span class="mord mathnormal mtight" style="margin-right:0.03588em;">y</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>在每步去噪后，沿梯度方向以步长 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 更新潜变量，将其拉向参考异常的特征分布。参数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 控制细化强度，直接影响参考保真度与生成真实性之间的权衡。</p>
+<h4 id="真实性-保真度控制器（Plausibility-Fidelity-Controller）">真实性-保真度控制器（Plausibility-Fidelity Controller）</h4>
+<p><strong>问题背景：</strong> 参数 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 是一个关键超参数——<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 过小则合成结果偏离参考异常太远（仅保留了大致类型，丢失细节），<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 过大则会引入视觉伪影（artifacts），损害真实性（plausibility）。对每个样本手动调节 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 是不可行的。</p>
+<p><strong>解决方案：</strong> 引入视觉语言模型（VLM）作为自动控制器，动态评估当前生成结果的真实性，并据此调整 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 值：</p>
+<ul>
+<li><strong>VLM 打分：</strong> 在去噪过程的中间步骤，利用 VLM 对当前去噪结果的异常区域进行真实性评估（即：该区域在目标产品上看起来是否合理？）；</li>
+<li><strong>动态调整：</strong> 若 VLM 判断当前生成真实性较高，可适当增大 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 以提升保真度；若 VLM 判断真实性已受损，则降低 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span>，让模型先验起更大作用。</li>
+</ul>
+<p>这一自适应控制策略使框架无需手动调参，在不同对象和异常类型上均能自动找到保真度与真实性的最优平衡点。</p>
+<h2 id="3-实验设置">3. 实验设置</h2>
+<h3 id="3-1-数据集">3.1 数据集</h3>
+<h4 id="MVTec-AD-数据集（工业异常检测基准）">MVTec-AD 数据集（工业异常检测基准）</h4>
+<p>MVTec-AD<sup id="fnref:1" class="footnote-ref"><a href="#fn:1" rel="footnote"><span class="hint--top hint--rounded" aria-label="Bergmann, P., et al. (2019). MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection. _CVPR 2019_.">[1]</span></a></sup> 是工业异常检测领域最广泛使用的标准基准，包含 15 类工业产品（纹理类和结构类），每类包含正常图像（训练集）和多种类型的异常图像（测试集）。本文以 MVTec-AD 作为下游异常检测任务的评估集。</p>
+<h4 id="Real-IAD-数据集（历史异常知识库）">Real-IAD 数据集（历史异常知识库）</h4>
+<p>Real-IAD<sup id="fnref:5" class="footnote-ref"><a href="#fn:5" rel="footnote"><span class="hint--top hint--rounded" aria-label="Wang, C., et al. (2024). Real-IAD: A Real-World Multi-View Dataset for Benchmarking Versatile Industrial Anomaly Detection. _CVPR 2024_.">[5]</span></a></sup> 是一个真实世界多视角工业异常检测数据集，包含 30 种工业零件及其对应的异常图像。在本框架中，Real-IAD 被用作<strong>历史异常图像知识库</strong>：</p>
+<ul>
+<li>对象文本信息构成检索智能体的知识库文本索引；</li>
+<li>所有异常图像构成可供检索的历史异常图像池；</li>
+<li>为确保评估公正，MVTec-AD 的测试集数据在整个检索和生成过程中<strong>从未被触碰</strong>，彻底避免数据泄漏。</li>
+</ul>
+<h3 id="3-2-评估指标">3.2 评估指标</h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>含义</th>
+<th>越大/小越好</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pixel-AP</strong></td>
+<td>像素级平均精度（Average Precision），综合衡量异常区域定位精度</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>F₁-max</strong></td>
+<td>最优 F₁ 分数</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>AUPRO</strong></td>
+<td>每区域曲线下面积（Per-Region Overlap AUC），衡量细粒度定位</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>Pixel-AUROC</strong></td>
+<td>像素级 ROC 曲线下面积</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>Image-AUROC</strong></td>
+<td>图像级 ROC 曲线下面积，衡量图像级异常分类</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>Image-AP</strong></td>
+<td>图像级平均精度</td>
+<td>越大越好</td>
+</tr>
+<tr>
+<td><strong>FID</strong></td>
+<td>Fréchet Inception Distance，衡量合成图像与真实图像的分布距离<sup id="fnref:9" class="footnote-ref"><a href="#fn:9" rel="footnote"><span class="hint--top hint--rounded" aria-label="Heusel, M., et al. (2017). GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium. _NeurIPS 2017_.">[9]</span></a></sup></td>
+<td>越小越好</td>
+</tr>
+<tr>
+<td><strong>LPIPS</strong></td>
+<td>感知图像块相似度，衡量合成图像的感知质量<sup id="fnref:10" class="footnote-ref"><a href="#fn:10" rel="footnote"><span class="hint--top hint--rounded" aria-label="Zhang, R., et al. (2018). The Unreasonable Effectiveness of Deep Features as a Perceptual Metric. _CVPR 2018_.">[10]</span></a></sup></td>
+<td>越小越好</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-实验结果">4. 实验结果</h2>
+<h3 id="4-1-异常检测性能对比（MVTec-AD）">4.1 异常检测性能对比（MVTec-AD）</h3>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>发表</th>
+<th>Pixel-AP↑</th>
+<th>F₁-max↑</th>
+<th>AUPRO↑</th>
+<th>Pixel-AUROC↑</th>
+<th>Image-AP↑</th>
+<th>Image-AUROC↑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RD4AD<sup id="fnref:11" class="footnote-ref"><a href="#fn:11" rel="footnote"><span class="hint--top hint--rounded" aria-label="Deng, H., &amp; Li, X. (2022). Anomaly Detection via Reverse Distillation from One-Class Embedding. _CVPR 2022_.">[11]</span></a></sup></td>
+<td>CVPR22</td>
+<td>48.6</td>
+<td>53.8</td>
+<td>91.1</td>
+<td>96.1</td>
+<td>96.5</td>
+<td>94.6</td>
+</tr>
+<tr>
+<td>SimpleNet<sup id="fnref:12" class="footnote-ref"><a href="#fn:12" rel="footnote"><span class="hint--top hint--rounded" aria-label="Liu, Z., et al. (2023). SimpleNet: A Simple Network for Image Anomaly Detection and Localization. _CVPR 2023_.">[12]</span></a></sup></td>
+<td>CVPR23</td>
+<td>45.9</td>
+<td>49.7</td>
+<td>86.5</td>
+<td>96.9</td>
+<td>98.4</td>
+<td>95.3</td>
+</tr>
+<tr>
+<td>DeSTSeg<sup id="fnref:13" class="footnote-ref"><a href="#fn:13" rel="footnote"><span class="hint--top hint--rounded" aria-label="Zhang, X., et al. (2023). DeSTSeg: Segmentation Guided Denoising Student-Teacher for Anomaly Detection. _CVPR 2023_.">[13]</span></a></sup></td>
+<td>CVPR23</td>
+<td>54.3</td>
+<td>50.9</td>
+<td>64.8</td>
+<td>93.1</td>
+<td>95.5</td>
+<td>89.2</td>
+</tr>
+<tr>
+<td>UniAD<sup id="fnref:14" class="footnote-ref"><a href="#fn:14" rel="footnote"><span class="hint--top hint--rounded" aria-label="You, Z., et al. (2022). A Unified Model for Multi-Class Anomaly Detection. _NeurIPS 2022_.">[14]</span></a></sup></td>
+<td>NeurIPS22</td>
+<td>43.4</td>
+<td>49.5</td>
+<td>90.7</td>
+<td>96.8</td>
+<td>98.8</td>
+<td>96.5</td>
+</tr>
+<tr>
+<td>ReContrast<sup id="fnref:15" class="footnote-ref"><a href="#fn:15" rel="footnote"><span class="hint--top hint--rounded" aria-label="Guo, J., et al. (2023). ReContrast: Domain-Specific Anomaly Detection via Contrastive Reconstruction. _NeurIPS 2023_.">[15]</span></a></sup></td>
+<td>NeurIPS23</td>
+<td>60.2</td>
+<td>61.5</td>
+<td>93.2</td>
+<td>97.1</td>
+<td>99.4</td>
+<td>98.3</td>
+</tr>
+<tr>
+<td>DiAD<sup id="fnref:16" class="footnote-ref"><a href="#fn:16" rel="footnote"><span class="hint--top hint--rounded" aria-label="He, Y., et al. (2024). DiAD: A Diffusion-Based Framework for Multi-Class Anomaly Detection. _AAAI 2024_.">[16]</span></a></sup></td>
+<td>AAAI24</td>
+<td>52.6</td>
+<td>55.5</td>
+<td>90.7</td>
+<td>96.8</td>
+<td>99.0</td>
+<td>97.2</td>
+</tr>
+<tr>
+<td>ViTAD<sup id="fnref:17" class="footnote-ref"><a href="#fn:17" rel="footnote"><span class="hint--top hint--rounded" aria-label="Zhu, Y., et al. (2023). ViTAD: Vision Transformer for Unsupervised Anomaly Detection. _arXiv 2023_.">[17]</span></a></sup></td>
+<td>arXiv23</td>
+<td>55.3</td>
+<td>58.7</td>
+<td>91.4</td>
+<td>97.7</td>
+<td>99.4</td>
+<td>98.3</td>
+</tr>
+<tr>
+<td>MambaAD<sup id="fnref:18" class="footnote-ref"><a href="#fn:18" rel="footnote"><span class="hint--top hint--rounded" aria-label="He, J., et al. (2024). MambaAD: Exploring State Space Models for Multi-Class Unsupervised Anomaly Detection. _NeurIPS 2024_.">[18]</span></a></sup></td>
+<td>NeurIPS24</td>
+<td>56.3</td>
+<td>59.2</td>
+<td>93.1</td>
+<td>97.7</td>
+<td>99.6</td>
+<td>98.6</td>
+</tr>
+<tr>
+<td><strong>Ours</strong></td>
+<td>—</td>
+<td><strong>66.4</strong></td>
+<td><strong>65.9</strong></td>
+<td><strong>94.8</strong></td>
+<td><strong>98.5</strong></td>
+<td><strong>99.7</strong></td>
+<td><strong>99.0</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>本方法在像素级 AP 上达到 <strong>66.4%</strong>，比第二名 ReContrast（60.2%）高出 <strong>6.2 个百分点</strong>，在所有指标上均取得最优结果。</p>
+</blockquote>
+<h3 id="4-2-合成图像多样性对比">4.2 合成图像多样性对比</h3>
+<p><img src="/img/%E8%AE%BA%E6%96%87%E4%BA%8C/fig3_diversity.png" srcset="/img/loading.gif" lazyload alt="Figure 3: 多样性对比"></p>
+<blockquote>
+<p><strong>图3说明：</strong> 本方法与 AnomalyDiffusion<sup id="fnref:19" class="footnote-ref"><a href="#fn:19" rel="footnote"><span class="hint--top hint--rounded" aria-label="Hu, J., et al. (2024). AnomalyDiffusion: Few-Shot Anomaly Image Generation with Diffusion Model. _AAAI 2024_.">[19]</span></a></sup> 的合成多样性对比。AnomalyDiffusion 只能生成 MVTec-AD 数据集中已有的有限异常类别；而 Anomaly Agent 通过检索 Real-IAD 历史异常库，可以为目标对象提供<strong>更多样、更丰富</strong>的异常类别参考，合成结果涵盖了真实生产中更广泛的异常类型。</p>
+</blockquote>
+<h3 id="4-3-Anomaly-aware-CLIP的缺陷检测">4.3 Anomaly-aware CLIP的缺陷检测</h3>
+<p><img src="/img/%E8%AE%BA%E6%96%87%E4%BA%8C/fig4_qualitative.png" srcset="/img/loading.gif" lazyload alt="Figure 4: 定性可视化结果"></p>
+<blockquote>
+<p>经过缺陷数据微调后，CLIP变为Anomaly-aware CLIP，能够识别和定位图像中的缺陷。第一列为缺陷图像，第二列为原始的CLIP进行缺陷检测的热力图，第三列为微调后的Anomaly-aware CLIP进行缺陷检测的热力图。</p>
+</blockquote>
+<h3 id="4-4-生成图像的真实性和保真度">4.4 生成图像的真实性和保真度</h3>
+<p><img src="/img/%E8%AE%BA%E6%96%87%E4%BA%8C/fig5_retrieval.png" srcset="/img/loading.gif" lazyload alt="Figure 5: 检索结果可视化"></p>
+<blockquote>
+<p>针对不同偏好的生成图像的展示。第一列为参考图像，第二列为生成图像（真实性更强，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 数值低），第三列为生成图像（保真度更强，和参考图像更相似，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 数值高）。</p>
+</blockquote>
+<h2 id="5-消融实验">5. 消融实验</h2>
+<h3 id="5-1-各模块的独立贡献">5.1 各模块的独立贡献</h3>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>Pixel-AP↑</th>
+<th>AUPRO↑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline（仅使用正常图像训练）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>+ 异常参考检索（无合成）</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>+ 合成（无梯度细化）</td>
+<td>62.1</td>
+<td>93.5</td>
+</tr>
+<tr>
+<td>+ 保真度梯度细化</td>
+<td>65.0</td>
+<td>94.5</td>
+</tr>
+<tr>
+<td><strong>+ 真实性-保真度控制器（完整方法）</strong></td>
+<td><strong>66.4</strong></td>
+<td><strong>94.8</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>每个模块均对最终性能有独立的正向贡献，完整框架效果最优。</p>
+</blockquote>
+<h3 id="5-2-参数-η-的影响">5.2 参数 η 的影响</h3>
+<p>实验表明，固定 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 值对不同对象和异常类型的效果差异显著：</p>
+<ul>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 过低（如 0.01）：合成异常过于&quot;平庸&quot;，与参考异常相似度低；</li>
+<li><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>η</mi></mrow><annotation encoding="application/x-tex">\eta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">η</span></span></span></span> 过高（如 0.5）：合成图像出现明显伪影，真实性受损；</li>
+<li>真实性-保真度控制器的自动调节在各类别上均能找到较好的平衡点。</li>
+</ul>
+<h2 id="6-核心创新点总结">6. 核心创新点总结</h2>
+<table>
+<thead>
+<tr>
+<th>创新点</th>
+<th>解决的问题</th>
+<th>技术手段</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>异常参考检索智能体</strong></td>
+<td>历史数据利用不足、无法预见未知异常</td>
+<td>LLM + Anomaly-aware CLIP 跨模态检索</td>
+<td>实现生产前异常多样化合成</td>
+</tr>
+<tr>
+<td><strong>统一异常合成智能体（无训练）</strong></td>
+<td>每类需单独训练生成模型</td>
+<td>基于预训练 LDM 的 training-free 推理</td>
+<td>统一模型覆盖所有对象类别</td>
+</tr>
+<tr>
+<td><strong>保真度梯度细化</strong></td>
+<td>合成异常与参考视觉差异大</td>
+<td>去噪过程中引入梯度引导拉近特征距离</td>
+<td>合成质量显著提升</td>
+</tr>
+<tr>
+<td><strong>真实性-保真度控制器</strong></td>
+<td>η 手动调参困难</td>
+<td>VLM 动态评估并自动调节 η</td>
+<td>全自动无需手工调参</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Before-Manufacturing-的深层含义">&quot;Before Manufacturing&quot;的深层含义</h3>
+<p>本文标题中的&quot;Before Manufacturing&quot;（生产前）强调了方法的核心价值：<strong>在目标产品进入实际生产线之前，即可利用历史异常知识库完成异常数据准备工作</strong>，使下游检测模型能够提前训练并部署，而非等待生产阶段缓慢积累异常样本。</p>
+<p>这一思路将传统的&quot;先收集→再训练→再检测&quot;的被动流程，转变为&quot;先检索→先合成→先训练&quot;的主动流程，对于快速迭代的现代智能制造场景具有重要的实际意义。</p>
+<h2 id="7-相关工作">7. 相关工作</h2>
+<h3 id="7-1-异常数据生成方法">7.1 异常数据生成方法</h3>
+<table>
+<thead>
+<tr>
+<th>方法类别</th>
+<th>代表性工作</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>纹理粘贴</td>
+<td>DRAEM<sup id="fnref:20" class="footnote-ref"><a href="#fn:20" rel="footnote"><span class="hint--top hint--rounded" aria-label="Zavrtanik, V., et al. (2021). DRAEM - A Discriminatively Trained Reconstruction Embedding for Surface Anomaly Detection. _ICCV 2021_.">[20]</span></a></sup>, Cut-Paste</td>
+<td>简单直接</td>
+<td>真实感差，多样性低</td>
+</tr>
+<tr>
+<td>GAN 生成</td>
+<td>DefectGAN<sup id="fnref:21" class="footnote-ref"><a href="#fn:21" rel="footnote"><span class="hint--top hint--rounded" aria-label="Zhang, G., et al. (2021). DefectGAN: High-Fidelity Defect Synthesis for Automated Defect Inspection. _WACV 2021_.">[21]</span></a></sup></td>
+<td>质量较好</td>
+<td>每类需独立训练，可扩展性差</td>
+</tr>
+<tr>
+<td>扩散模型（单一数据集）</td>
+<td>AnomalyDiffusion<sup id="fnref:19" class="footnote-ref"><a href="#fn:19" rel="footnote"><span class="hint--top hint--rounded" aria-label="Hu, J., et al. (2024). AnomalyDiffusion: Few-Shot Anomaly Image Generation with Diffusion Model. _AAAI 2024_.">[19]</span></a></sup></td>
+<td>高质量</td>
+<td>局限于已知异常类别</td>
+</tr>
+<tr>
+<td><strong>本文方法（跨数据集迁移）</strong></td>
+<td><strong>Anomaly Agent</strong></td>
+<td><strong>多样性强、无需训练</strong></td>
+<td><strong>检索质量依赖知识库规模</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="7-2-基础模型">7.2 基础模型</h3>
+<ul>
+<li><strong>LDM（Latent Diffusion Model）</strong>（Rombach et al., CVPR 2022）<sup id="fnref:7" class="footnote-ref"><a href="#fn:7" rel="footnote"><span class="hint--top hint--rounded" aria-label="Rombach, R., et al. (2022). High-Resolution Image Synthesis with Latent Diffusion Models. _CVPR 2022_.">[7]</span></a></sup>：将扩散过程迁移到 VAE 潜变量空间，大幅降低计算量，是 Stable Diffusion 的核心框架；</li>
+<li><strong>CLIP</strong>（Radford et al., ICML 2021）<sup id="fnref:6" class="footnote-ref"><a href="#fn:6" rel="footnote"><span class="hint--top hint--rounded" aria-label="Radford, A., et al. (2021). Learning Transferable Visual Models From Natural Language Supervision. _ICML 2021_.">[6]</span></a></sup>：跨模态视觉-语言预训练模型，提供文本-图像相似度度量；</li>
+<li><strong>GPT-4o</strong>（OpenAI, 2024）<sup id="fnref:3" class="footnote-ref"><a href="#fn:3" rel="footnote"><span class="hint--top hint--rounded" aria-label="OpenAI. (2024). GPT-4o Technical Report. _OpenAI_.">[3]</span></a></sup>：多模态大语言模型，提供视觉问答和语义推理能力；</li>
+<li><strong>ELITE</strong>（Wei et al., ICCV 2023）<sup id="fnref:8" class="footnote-ref"><a href="#fn:8" rel="footnote"><span class="hint--top hint--rounded" aria-label="Wei, Y., et al. (2023). ELITE: Encoding Visual Concepts into Textual Embeddings for Customized Text-to-Image Generation. _ICCV 2023_.">[8]</span></a></sup>：将视觉概念编码为文本嵌入，支持定制化文本引导图像生成；</li>
+<li><strong>RAG（Retrieval-Augmented Generation）</strong><sup id="fnref:4" class="footnote-ref"><a href="#fn:4" rel="footnote"><span class="hint--top hint--rounded" aria-label="Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. _NeurIPS 2020_.">[4]</span></a></sup>：通过外部知识库增强 LLM 的检索和推理能力。</li>
+</ul>
+<h3 id="7-3-异常检测框架">7.3 异常检测框架</h3>
+<ul>
+<li><strong>RD4AD</strong><sup id="fnref:11" class="footnote-ref"><a href="#fn:11" rel="footnote"><span class="hint--top hint--rounded" aria-label="Deng, H., &amp; Li, X. (2022). Anomaly Detection via Reverse Distillation from One-Class Embedding. _CVPR 2022_.">[11]</span></a></sup>：利用反向蒸馏（reverse distillation）进行单类别异常检测；</li>
+<li><strong>UniAD</strong><sup id="fnref:14" class="footnote-ref"><a href="#fn:14" rel="footnote"><span class="hint--top hint--rounded" aria-label="You, Z., et al. (2022). A Unified Model for Multi-Class Anomaly Detection. _NeurIPS 2022_.">[14]</span></a></sup>：统一多类别异常检测模型；</li>
+<li><strong>MambaAD</strong><sup id="fnref:18" class="footnote-ref"><a href="#fn:18" rel="footnote"><span class="hint--top hint--rounded" aria-label="He, J., et al. (2024). MambaAD: Exploring State Space Models for Multi-Class Unsupervised Anomaly Detection. _NeurIPS 2024_.">[18]</span></a></sup>：基于 Mamba 状态空间模型的高效异常检测方法。</li>
+</ul>
+<hr>
+<h2 id="参考">参考</h2>
+<section class="footnotes"><div class="footnote-list"><ol><li><span id="fn:1" class="footnote-text"><span>Bergmann, P., et al. (2019). MVTec AD — A Comprehensive Real-World Dataset for Unsupervised Anomaly Detection. <em>CVPR 2019</em>.
+<a href="#fnref:1" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:2" class="footnote-text"><span>Hu, J., et al. (2024). AnomalyDiffusion: Few-Shot Anomaly Image Generation with Diffusion Model. <em>AAAI 2024</em>.
+<a href="#fnref:2" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:3" class="footnote-text"><span>OpenAI. (2024). GPT-4o Technical Report. <em>OpenAI</em>.
+<a href="#fnref:3" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:4" class="footnote-text"><span>Lewis, P., et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. <em>NeurIPS 2020</em>.
+<a href="#fnref:4" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:5" class="footnote-text"><span>Wang, C., et al. (2024). Real-IAD: A Real-World Multi-View Dataset for Benchmarking Versatile Industrial Anomaly Detection. <em>CVPR 2024</em>.
+<a href="#fnref:5" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:6" class="footnote-text"><span>Radford, A., et al. (2021). Learning Transferable Visual Models From Natural Language Supervision. <em>ICML 2021</em>.
+<a href="#fnref:6" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:7" class="footnote-text"><span>Rombach, R., et al. (2022). High-Resolution Image Synthesis with Latent Diffusion Models. <em>CVPR 2022</em>.
+<a href="#fnref:7" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:8" class="footnote-text"><span>Wei, Y., et al. (2023). ELITE: Encoding Visual Concepts into Textual Embeddings for Customized Text-to-Image Generation. <em>ICCV 2023</em>.
+<a href="#fnref:8" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:9" class="footnote-text"><span>Heusel, M., et al. (2017). GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium. <em>NeurIPS 2017</em>.
+<a href="#fnref:9" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:10" class="footnote-text"><span>Zhang, R., et al. (2018). The Unreasonable Effectiveness of Deep Features as a Perceptual Metric. <em>CVPR 2018</em>.
+<a href="#fnref:10" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:11" class="footnote-text"><span>Deng, H., &amp; Li, X. (2022). Anomaly Detection via Reverse Distillation from One-Class Embedding. <em>CVPR 2022</em>.
+<a href="#fnref:11" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:12" class="footnote-text"><span>Liu, Z., et al. (2023). SimpleNet: A Simple Network for Image Anomaly Detection and Localization. <em>CVPR 2023</em>.
+<a href="#fnref:12" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:13" class="footnote-text"><span>Zhang, X., et al. (2023). DeSTSeg: Segmentation Guided Denoising Student-Teacher for Anomaly Detection. <em>CVPR 2023</em>.
+<a href="#fnref:13" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:14" class="footnote-text"><span>You, Z., et al. (2022). A Unified Model for Multi-Class Anomaly Detection. <em>NeurIPS 2022</em>.
+<a href="#fnref:14" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:15" class="footnote-text"><span>Guo, J., et al. (2023). ReContrast: Domain-Specific Anomaly Detection via Contrastive Reconstruction. <em>NeurIPS 2023</em>.
+<a href="#fnref:15" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:16" class="footnote-text"><span>He, Y., et al. (2024). DiAD: A Diffusion-Based Framework for Multi-Class Anomaly Detection. <em>AAAI 2024</em>.
+<a href="#fnref:16" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:17" class="footnote-text"><span>Zhu, Y., et al. (2023). ViTAD: Vision Transformer for Unsupervised Anomaly Detection. <em>arXiv 2023</em>.
+<a href="#fnref:17" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:18" class="footnote-text"><span>He, J., et al. (2024). MambaAD: Exploring State Space Models for Multi-Class Unsupervised Anomaly Detection. <em>NeurIPS 2024</em>.
+<a href="#fnref:18" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:19" class="footnote-text"><span>Hu, J., et al. (2024). AnomalyDiffusion: Few-Shot Anomaly Image Generation with Diffusion Model. <em>AAAI 2024</em>.
+<a href="#fnref:19" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:20" class="footnote-text"><span>Zavrtanik, V., et al. (2021). DRAEM - A Discriminatively Trained Reconstruction Embedding for Surface Anomaly Detection. <em>ICCV 2021</em>.
+<a href="#fnref:20" rev="footnote" class="footnote-backref"> ↩</a></span></span></li><li><span id="fn:21" class="footnote-text"><span>Zhang, G., et al. (2021). DefectGAN: High-Fidelity Defect Synthesis for Automated Defect Inspection. <em>WACV 2021</em>.
+<a href="#fnref:21" rev="footnote" class="footnote-backref"> ↩</a></span></span></li></ol></div></section>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" class="category-chain-item">图像生成</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%8F%AF%E6%8E%A7%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" class="print-no-link">#可控图像生成</a>
+      
+        <a href="/tags/Stable-Diffusion/" class="print-no-link">#Stable Diffusion</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>论文二：融合缺陷检索和缺陷生成</div>
+      <div>https://huan-yin.github.io/2026/04/05/论文二/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>李相越</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年4月5日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/03/20/%E8%AE%BA%E6%96%87%E4%B8%80/" title="论文一：掩码引导的缺陷图像生成">
+                        <span class="hidden-mobile">论文一：掩码引导的缺陷图像生成</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/custom.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
