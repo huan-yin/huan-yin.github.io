@@ -1,0 +1,858 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/banner.png">
+  <link rel="icon" href="/img/banner.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="李相越">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="手撕 DiT，深入理解 DiT 架构和 Flow Matching 的训练">
+<meta property="og:type" content="article">
+<meta property="og:title" content="手撕DiT">
+<meta property="og:url" content="https://huan-yin.github.io/2026/04/09/%E6%89%8B%E6%92%95DiT/index.html">
+<meta property="og:site_name" content="李相越的博客">
+<meta property="og:description" content="手撕 DiT，深入理解 DiT 架构和 Flow Matching 的训练">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huan-yin.github.io/img/%E6%89%8B%E6%92%95DiT/%E6%89%8B%E6%92%95DiT.png">
+<meta property="article:published_time" content="2026-04-09T15:12:50.000Z">
+<meta property="article:modified_time" content="2026-04-09T15:59:03.561Z">
+<meta property="article:author" content="李相越">
+<meta property="article:tag" content="DiT">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://huan-yin.github.io/img/%E6%89%8B%E6%92%95DiT/%E6%89%8B%E6%92%95DiT.png">
+  
+  
+  
+  <title>手撕DiT - 李相越的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"huan-yin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":false,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="手撕DiT"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-04-09 23:12" pubdate>
+          2026年4月9日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          12k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          104 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">手撕DiT</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="手撕-dit">手撕 DiT</h1>
+<p>实现一个轻量级的 <strong>DiT (Diffusion Transformer)</strong> 架构，结合了目前前沿的 <strong>Flow Matching (流匹配)</strong> 范式，并在自定义的模拟数据集上完成了完整的训练与欧拉法采样闭环。</p>
+<h2 id="DiT-架构核心原理">DiT 架构核心原理</h2>
+<p>DiT (Diffusion Transformer) 的核心思想非常简单粗暴但极其有效：<strong>用 Transformer 替换掉传统 Diffusion 模型（如 DDPM）中常用的 U-Net 架构。</strong> 它的成功证明了 Transformer 在视觉生成任务上同样具备强大的 Scaling Law。DiT 的架构主要依赖以下几个关键机制：</p>
+<ol>
+<li><strong>图像块化 (Patchify)</strong>：继承自 ViT 的思想。DiT 将输入的潜变量空间切分成不重叠的 Patch，并展平为一维序列，将图像生成转换为标准的序列建模任务。</li>
+<li><strong>条件注入 (adaLN-Zero)</strong>：模型需要知道当前时间步 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi></mrow><annotation encoding="application/x-tex">t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span></span></span></span> 和条件 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi></mrow><annotation encoding="application/x-tex">y</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span></span></span></span>。DiT 抛弃了交叉注意力，使用 adaLN (自适应层归一化)。条件向量被映射为缩放 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05556em;">γ</span></span></span></span>、平移 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05278em;">β</span></span></span></span> 和残差门控 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0037em;">α</span></span></span></span>。初始化时，这些参数全为 0，这保证了深层 Transformer 早期训练的极高稳定性。</li>
+<li><strong>极简目标 (Flow Matching)</strong>：这套代码使用了 Flow Matching 而非 DDPM。它构建了一条从纯噪声 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub><mo>∼</mo><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi>I</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">x_0 \sim \mathcal{N}(0, I)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∼</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathcal" style="margin-right:0.14736em;">N</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07847em;">I</span><span class="mclose">)</span></span></span></span> 到真实数据 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">x_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 的直线路径：<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>t</mi></msub><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><mi>t</mi><mo>⋅</mo><mo stretchy="false">(</mo><msub><mi>x</mi><mn>1</mn></msub><mo>−</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">x_t = x_0 + t \cdot (x_1 - x_0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6151em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。模型只需预测这个线性过程的向量场 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>=</mo><msub><mi>x</mi><mn>1</mn></msub><mo>−</mo><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">v = x_1 - x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，推理时用欧拉法积分即可生成图像。</li>
+</ol>
+<h2 id="环境准备与全局设置">环境准备与全局设置</h2>
+<p>这部分主要负责导入必要的库，并固定随机种子以保证实验的绝对可复现性。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F<br><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader, TensorDataset<br><span class="hljs-keyword">import</span> matplotlib.pyplot <span class="hljs-keyword">as</span> plt<br><span class="hljs-keyword">import</span> numpy <span class="hljs-keyword">as</span> np<br><span class="hljs-keyword">import</span> os<br><br><span class="hljs-comment"># 新建images文件夹，避免保存图片报错</span><br>os.makedirs(<span class="hljs-string">&quot;images&quot;</span>, exist_ok=<span class="hljs-literal">True</span>)<br><br><span class="hljs-comment"># 固定随机种子，保证可复现</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">set_seed</span>(<span class="hljs-params">seed=<span class="hljs-number">42</span></span>):<br>    torch.manual_seed(seed)<br>    torch.cuda.manual_seed_all(seed)<br>    np.random.seed(seed)<br>    torch.backends.cudnn.deterministic = <span class="hljs-literal">True</span><br><br>set_seed(<span class="hljs-number">42</span>)<br></code></pre></td></tr></table></figure>
+<h2 id="时间位置编码">时间位置编码</h2>
+<p>时间位置编码 (SinusoidalPositionEmbeddings)</p>
+<p><strong>作用</strong>：将连续的时间步 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>∈</mo><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">t \in [0, 1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6542em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span> 转换为高维向量，让神经网络能“感受”到时间的流逝。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -------------------------- 1. 正弦时间位置编码 --------------------------</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">SinusoidalPositionEmbeddings</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim</span>):<br>        <span class="hljs-built_in">super</span>().__init__()<br>        <span class="hljs-variable language_">self</span>.dim = dim<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, time</span>):<br>        device = time.device<br>        half_dim = <span class="hljs-variable language_">self</span>.dim // <span class="hljs-number">2</span><br>        <span class="hljs-comment"># 利用对数空间的指数运算来生成不同频率的 base</span><br>        embeddings = torch.log(torch.tensor(<span class="hljs-number">10000.0</span>)) / (half_dim - <span class="hljs-number">1</span>)<br>        embeddings = torch.exp(torch.arange(half_dim, device=device) * -embeddings)<br>        <span class="hljs-comment"># 将时间 t 与频率相乘</span><br>        embeddings = time[:, <span class="hljs-literal">None</span>] * embeddings[<span class="hljs-literal">None</span>, :]<br>        <span class="hljs-comment"># 拼接 sin 和 cos，形成完整的位置编码</span><br>        embeddings = torch.cat((embeddings.sin(), embeddings.cos()), dim=-<span class="hljs-number">1</span>)<br>        <span class="hljs-keyword">return</span> embeddings<br></code></pre></td></tr></table></figure>
+<p><strong>解读</strong>：这是经典的 Transformer 位置编码公式实现。通过 <code>sin</code> 和 <code>cos</code> 的组合，它能将标量时间转化为具有周期性特征的 <code>dim</code> 维张量，这是后续生成 adaLN 调制参数的原始信号源。</p>
+<h2 id="核心机制：DiT-Block-与-adaLN-Zero">核心机制：DiT Block 与 adaLN-Zero</h2>
+<p><strong>作用</strong>：DiT 的特征提取基石。包含了 Self-Attention、MLP 以及最核心的 6 参数 adaLN-Zero 调制层。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -------------------------- 2. 核心DiT Block（6参数调制核心修改） --------------------------</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">DiTBlock</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, hidden_size, num_heads, mlp_ratio=<span class="hljs-number">4.0</span></span>):<br>        <span class="hljs-built_in">super</span>().__init__()<br>        <span class="hljs-comment"># 注意：这里的 LayerNorm 关闭了 elementwise_affine (即可学习的 gamma 和 beta)</span><br>        <span class="hljs-comment"># 因为这两个参数将由 adaLN 动态生成</span><br>        <span class="hljs-variable language_">self</span>.norm1 = nn.LayerNorm(hidden_size, elementwise_affine=<span class="hljs-literal">False</span>, eps=<span class="hljs-number">1e-6</span>)<br>        <span class="hljs-variable language_">self</span>.attn = nn.MultiheadAttention(hidden_size, num_heads, batch_first=<span class="hljs-literal">True</span>)<br><br>        <span class="hljs-variable language_">self</span>.norm2 = nn.LayerNorm(hidden_size, elementwise_affine=<span class="hljs-literal">False</span>, eps=<span class="hljs-number">1e-6</span>)<br>        mlp_hidden_dim = <span class="hljs-built_in">int</span>(hidden_size * mlp_ratio)<br>        <span class="hljs-variable language_">self</span>.mlp = nn.Sequential(<br>            nn.Linear(hidden_size, mlp_hidden_dim),<br>            nn.GELU(),<br>            nn.Linear(mlp_hidden_dim, hidden_size)<br>        )<br><br>        <span class="hljs-comment"># ========== 6参数调制层，输出维度为 hidden_size * 6 ==========</span><br>        <span class="hljs-comment"># 对应：scale_mha, shift_mha, gate_mha, scale_mlp, shift_mlp, gate_mlp</span><br>        <span class="hljs-variable language_">self</span>.adaLN_modulation = nn.Sequential(<br>            nn.SiLU(),<br>            nn.Linear(hidden_size, hidden_size * <span class="hljs-number">6</span>)<br>        )<br><br>        <span class="hljs-comment"># ========== adaLN-Zero零初始化，保证训练初始稳定性 ==========</span><br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.adaLN_modulation[-<span class="hljs-number">1</span>].weight)<br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.adaLN_modulation[-<span class="hljs-number">1</span>].bias)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, t_emb</span>):<br>        <span class="hljs-comment"># ========== 拆分6个调制参数 ==========</span><br>        modulation = <span class="hljs-variable language_">self</span>.adaLN_modulation(t_emb)<br>        scale_mha, shift_mha, gate_mha, scale_mlp, shift_mlp, gate_mlp = modulation.chunk(<span class="hljs-number">6</span>, dim=-<span class="hljs-number">1</span>)<br><br>        <span class="hljs-comment"># 扩展维度，适配序列形状 [B, 1, hidden_size]，支持广播</span><br>        scale_mha = scale_mha[:, <span class="hljs-literal">None</span>, :]<br>        shift_mha = shift_mha[:, <span class="hljs-literal">None</span>, :]<br>        gate_mha = gate_mha[:, <span class="hljs-literal">None</span>, :]<br>        scale_mlp = scale_mlp[:, <span class="hljs-literal">None</span>, :]<br>        shift_mlp = shift_mlp[:, <span class="hljs-literal">None</span>, :]<br>        gate_mlp = gate_mlp[:, <span class="hljs-literal">None</span>, :]<br><br>        <span class="hljs-comment"># ========== Self-Attention 分支，使用专属3个参数 ==========</span><br>        residual = x<br>        x = <span class="hljs-variable language_">self</span>.norm1(x)<br>        x = x * (<span class="hljs-number">1</span> + scale_mha) + shift_mha  <span class="hljs-comment"># 标准adaLN缩放偏移</span><br>        attn_out, _ = <span class="hljs-variable language_">self</span>.attn(x, x, x)<br>        x = residual + gate_mha * attn_out  <span class="hljs-comment"># 门控残差连接</span><br><br>        <span class="hljs-comment"># ========== MLP 分支，使用专属3个参数 ==========</span><br>        residual = x<br>        x = <span class="hljs-variable language_">self</span>.norm2(x)<br>        x = x * (<span class="hljs-number">1</span> + scale_mlp) + shift_mlp  <span class="hljs-comment"># 标准adaLN缩放偏移</span><br>        mlp_out = <span class="hljs-variable language_">self</span>.mlp(x)<br>        x = residual + gate_mlp * mlp_out  <span class="hljs-comment"># 门控残差连接</span><br><br>        <span class="hljs-keyword">return</span> x<br></code></pre></td></tr></table></figure>
+<p><strong>解读</strong>：这是全篇最精妙的地方。<code>elementwise_affine=False</code> 是必须的，因为规范化参数交给了 <code>adaLN_modulation</code> 接管。全 0 初始化意味着在训练的第一步，<code>scale</code> 和 <code>shift</code> 为 0（等价于普通 LayerNorm），<code>gate</code> 也为 0（等价于 <code>x = residual + 0</code>）。这让初始网络成了一个完美的恒等映射，梯度可以毫无阻碍地传导，极大地加速了早期收敛。</p>
+<h2 id="宏观架构：DiT-主干网络">宏观架构：DiT 主干网络</h2>
+<p><strong>作用</strong>：处理图像到序列的转换 (Patchify)，融合时间和类别条件，并利用堆叠的 DiT Blocks 提取特征，最终还原回图像维度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -------------------------- 3. 简化版DiT主模型 --------------------------</span><br><span class="hljs-comment"># 适配小数据集，减小模型规模，加快训练</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">DiT</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params"></span><br><span class="hljs-params">        self,</span><br><span class="hljs-params">        input_size=<span class="hljs-number">32</span>,</span><br><span class="hljs-params">        patch_size=<span class="hljs-number">2</span>,</span><br><span class="hljs-params">        in_channels=<span class="hljs-number">4</span>,</span><br><span class="hljs-params">        hidden_size=<span class="hljs-number">256</span>,  <span class="hljs-comment"># 减小隐藏层维度，适配小数据</span></span><br><span class="hljs-params">        depth=<span class="hljs-number">6</span>,          <span class="hljs-comment"># 减少层数，加快训练</span></span><br><span class="hljs-params">        num_heads=<span class="hljs-number">8</span>,</span><br><span class="hljs-params">        mlp_ratio=<span class="hljs-number">4.0</span>,</span><br><span class="hljs-params">        num_classes=<span class="hljs-number">4</span>     <span class="hljs-comment"># 匹配我们模拟数据的4个类别</span></span><br><span class="hljs-params">    </span>):<br>        <span class="hljs-built_in">super</span>().__init__()<br>        <span class="hljs-variable language_">self</span>.in_channels = in_channels<br>        <span class="hljs-variable language_">self</span>.patch_size = patch_size<br>        <span class="hljs-variable language_">self</span>.num_patches = (input_size // patch_size) ** <span class="hljs-number">2</span><br><br>        <span class="hljs-comment"># Patch嵌入 (利用步长等于核大小的卷积极其高效地完成)</span><br>        <span class="hljs-variable language_">self</span>.patch_embed = nn.Conv2d(in_channels, hidden_size, kernel_size=patch_size, stride=patch_size)<br>        <span class="hljs-variable language_">self</span>.pos_embed = nn.Parameter(torch.zeros(<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.num_patches, hidden_size))<br><br>        <span class="hljs-comment"># 时间+类别嵌入（条件注入的总来源，输出给每个block的adaLN）</span><br>        <span class="hljs-variable language_">self</span>.time_embed = nn.Sequential(<br>            SinusoidalPositionEmbeddings(hidden_size),<br>            nn.Linear(hidden_size, hidden_size),<br>            nn.GELU(),<br>            nn.Linear(hidden_size, hidden_size)<br>        )<br>        <span class="hljs-variable language_">self</span>.class_embed = nn.Embedding(num_classes, hidden_size)<br><br>        <span class="hljs-comment"># Transformer Blocks</span><br>        <span class="hljs-variable language_">self</span>.blocks = nn.ModuleList([<br>            DiTBlock(hidden_size, num_heads, mlp_ratio) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(depth)<br>        ])<br><br>        <span class="hljs-comment"># 输出头</span><br>        <span class="hljs-variable language_">self</span>.norm_final = nn.LayerNorm(hidden_size, elementwise_affine=<span class="hljs-literal">False</span>, eps=<span class="hljs-number">1e-6</span>)<br>        <span class="hljs-comment"># 最终输出层也适配adaLN，增加调制层</span><br>        <span class="hljs-variable language_">self</span>.final_modulation = nn.Sequential(<br>            nn.SiLU(),<br>            nn.Linear(hidden_size, hidden_size * <span class="hljs-number">2</span>)<br>        )<br>        <span class="hljs-comment"># 输出维度为 patch内的像素总数 (p*p*C)</span><br>        <span class="hljs-variable language_">self</span>.head = nn.Linear(hidden_size, patch_size * patch_size * in_channels)<br><br>        <span class="hljs-comment"># 初始化权重</span><br>        <span class="hljs-variable language_">self</span>._init_weights()<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">_init_weights</span>(<span class="hljs-params">self</span>):<br>        nn.init.normal_(<span class="hljs-variable language_">self</span>.pos_embed, std=<span class="hljs-number">0.02</span>)<br>        nn.init.trunc_normal_(<span class="hljs-variable language_">self</span>.head.weight, std=<span class="hljs-number">0.02</span>)<br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.head.bias)<br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.final_modulation[-<span class="hljs-number">1</span>].weight)<br>        nn.init.zeros_(<span class="hljs-variable language_">self</span>.final_modulation[-<span class="hljs-number">1</span>].bias)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, t, y=<span class="hljs-literal">None</span></span>):<br>        B = x.shape[<span class="hljs-number">0</span>]<br><br>        <span class="hljs-comment"># Patchify + 位置编码</span><br>        x = <span class="hljs-variable language_">self</span>.patch_embed(x)<br>        x = x.flatten(<span class="hljs-number">2</span>).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br>        x = x + <span class="hljs-variable language_">self</span>.pos_embed<br><br>        <span class="hljs-comment"># 时间+类别条件嵌入（合并为统一的条件向量）</span><br>        t_emb = <span class="hljs-variable language_">self</span>.time_embed(t)<br>        <span class="hljs-keyword">if</span> y <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:<br>            t_emb = t_emb + <span class="hljs-variable language_">self</span>.class_embed(y)<br><br>        <span class="hljs-comment"># 经过DiT Blocks，每个block都接收统一的条件嵌入</span><br>        <span class="hljs-keyword">for</span> block <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.blocks:<br>            x = block(x, t_emb)<br><br>        <span class="hljs-comment"># 最终输出层adaLN调制</span><br>        scale_final, shift_final = <span class="hljs-variable language_">self</span>.final_modulation(t_emb).chunk(<span class="hljs-number">2</span>, dim=-<span class="hljs-number">1</span>)<br>        x = <span class="hljs-variable language_">self</span>.norm_final(x)<br>        x = x * (<span class="hljs-number">1</span> + scale_final[:, <span class="hljs-literal">None</span>, :]) + shift_final[:, <span class="hljs-literal">None</span>, :]<br>        x = <span class="hljs-variable language_">self</span>.head(x)<br><br>        <span class="hljs-comment"># 重组Patch，还原回图像空间 [B, C, H, W]</span><br>        h = w = <span class="hljs-built_in">int</span>(<span class="hljs-variable language_">self</span>.num_patches ** <span class="hljs-number">0.5</span>)<br>        p = <span class="hljs-variable language_">self</span>.patch_size<br>        x = x.transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).reshape(B, <span class="hljs-variable language_">self</span>.in_channels, p, p, h, w)<br>        x = torch.einsum(<span class="hljs-string">&#x27;n c p q h w -&gt; n c h p w q&#x27;</span>, x)<br>        x = x.reshape(B, <span class="hljs-variable language_">self</span>.in_channels, h * p, w * p)<br><br>        <span class="hljs-keyword">return</span> x<br></code></pre></td></tr></table></figure>
+<p><strong>解读</strong>：这里的重点在于特征空间的转换。输入是 <code>[B, C, H, W]</code>，经过 <code>patch_embed</code> 变成了 <code>[B, Seq_Len, Hidden]</code>，加上了位置编码 <code>pos_embed</code> 后进入 Blocks。在输出阶段，通过一个 Linear 层和 <code>einops</code> 风格的重排（<code>einsum</code>+<code>reshape</code>），将 Transformer 处理完的一维序列，完好无损地拼接回了原始的图像分辨率。</p>
+<h2 id="模拟数据集与-Flow-Matching-损失函数">模拟数据集与 Flow Matching 损失函数</h2>
+<p><strong>作用</strong>：为了快速验证模型，使用 Numpy 生成了几何图案作为真实数据分布；利用 Flow Matching 构建从高斯噪声到数据的直线目标。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">generate_simulation_dataset</span>(<span class="hljs-params"></span><br><span class="hljs-params">    num_samples=<span class="hljs-number">2000</span>,</span><br><span class="hljs-params">    img_size=<span class="hljs-number">32</span>,</span><br><span class="hljs-params">    in_channels=<span class="hljs-number">4</span>,</span><br><span class="hljs-params">    num_classes=<span class="hljs-number">4</span>,</span><br><span class="hljs-params">    noise_level=<span class="hljs-number">0.05</span>  <span class="hljs-comment"># 加少量噪声，模拟真实latent分布</span></span><br><span class="hljs-params"></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    生成带类别规律的模拟DiT训练数据集</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    x = np.linspace(-np.pi, np.pi, img_size)<br>    y = np.linspace(-np.pi, np.pi, img_size)<br>    xx, yy = np.meshgrid(x, y)<br><br>    data, labels = [], []<br>    samples_per_class = num_samples // num_classes<br><br>    <span class="hljs-keyword">for</span> class_id <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_classes):<br>        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(samples_per_class):<br>            <span class="hljs-keyword">if</span> class_id == <span class="hljs-number">0</span>:<br>                base_pattern = np.sin(<span class="hljs-number">2</span> * xx)<br>            <span class="hljs-keyword">elif</span> class_id == <span class="hljs-number">1</span>:<br>                base_pattern = np.sin(<span class="hljs-number">4</span> * yy)<br>            <span class="hljs-keyword">elif</span> class_id == <span class="hljs-number">2</span>:<br>                base_pattern = np.sign(np.sin(<span class="hljs-number">3</span> * xx) * np.sin(<span class="hljs-number">3</span> * yy))<br>            <span class="hljs-keyword">else</span>:<br>                base_pattern = np.exp(-(xx**<span class="hljs-number">2</span> + yy**<span class="hljs-number">2</span>) / <span class="hljs-number">2</span>) * np.cos(<span class="hljs-number">4</span> * np.sqrt(xx**<span class="hljs-number">2</span> + yy**<span class="hljs-number">2</span>))<br><br>            multi_channel_pattern = np.stack([<br>                base_pattern + <span class="hljs-number">0.1</span> * i <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(in_channels)<br>            ], axis=<span class="hljs-number">0</span>)<br><br>            multi_channel_pattern += np.random.normal(<span class="hljs-number">0</span>, noise_level, multi_channel_pattern.shape)<br>            multi_channel_pattern = multi_channel_pattern / np.<span class="hljs-built_in">max</span>(np.<span class="hljs-built_in">abs</span>(multi_channel_pattern))<br><br>            data.append(multi_channel_pattern)<br>            labels.append(class_id)<br><br>    data = torch.tensor(np.array(data), dtype=torch.float32)<br>    labels = torch.tensor(np.array(labels), dtype=torch.long)<br>    <span class="hljs-keyword">return</span> data, labels<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">flow_matching_loss</span>(<span class="hljs-params">model, x1, y=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Flow Matching 核心损失</span><br><span class="hljs-string">    x1: 真实数据</span><br><span class="hljs-string">    y: 类别标签</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    B = x1.shape[<span class="hljs-number">0</span>]<br>    device = x1.device<br><br>    <span class="hljs-comment"># 1. 均匀采样时间步 t ~ U[0, 1]</span><br>    t = torch.rand(B, device=device)<br>    t_expand = t[:, <span class="hljs-literal">None</span>, <span class="hljs-literal">None</span>, <span class="hljs-literal">None</span>]  <span class="hljs-comment"># 广播到图像维度</span><br><br>    <span class="hljs-comment"># 2. 采样源噪声 x0 ~ N(0, 1)</span><br>    x0 = torch.randn_like(x1)<br><br>    <span class="hljs-comment"># 3. 构造线性插值路径 x_t = x0 + t*(x1 - x0)</span><br>    x_t = x0 + t_expand * (x1 - x0)<br><br>    <span class="hljs-comment"># 4. 模型预测向量场</span><br>    v_pred = model(x_t, t, y)<br><br>    <span class="hljs-comment"># 5. 损失：MSE(预测向量场, 真实向量场 x1-x0)</span><br>    v_true = x1 - x0<br>    loss = F.mse_loss(v_pred, v_true)<br><br>    <span class="hljs-keyword">return</span> loss<br></code></pre></td></tr></table></figure>
+<p><strong>解读</strong>：<code>flow_matching_loss</code> 完美展现了当前主流（如 Stable Diffusion 3 都在用）的 Flow Matching 的优雅之处。相比 DDPM 复杂的 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\alpha_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 和 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>β</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\beta_t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05278em;">β</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.0528em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 调度表，FM 直接定义真实状态是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">x_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，噪声是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>，模型只需要简单地学习向量差 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>−</mo><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">x_1 - x_0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span> 即可，代码极其简练且数学背景坚实。</p>
+<h2 id="训练与推理采样-Euler-Method">训练与推理采样 (Euler Method)</h2>
+<p><strong>作用</strong>：调度优化器进行模型训练，并通过常微分方程 (ODE) 的欧拉方法，根据预测的向量场逆向生成图像。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">train_dit</span>(<span class="hljs-params">epochs=<span class="hljs-number">50</span>, batch_size=<span class="hljs-number">64</span>, lr=<span class="hljs-number">1e-4</span>, device=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-keyword">if</span> device <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>        device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;使用设备: <span class="hljs-subst">&#123;device&#125;</span>&quot;</span>)<br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;正在生成模拟数据集...&quot;</span>)<br>    data, labels = generate_simulation_dataset(num_samples=<span class="hljs-number">2000</span>)<br>    dataset = TensorDataset(data, labels)<br>    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=<span class="hljs-literal">True</span>, drop_last=<span class="hljs-literal">True</span>)<br><br>    model = DiT().to(device)<br>    optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=<span class="hljs-number">1e-4</span>)<br>    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)<br>    grad_clip = <span class="hljs-number">1.0</span>  <span class="hljs-comment"># 梯度裁剪</span><br><br>    total_params = <span class="hljs-built_in">sum</span>(p.numel() <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> model.parameters())<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;模型总参数量: <span class="hljs-subst">&#123;total_params / <span class="hljs-number">1e6</span>:<span class="hljs-number">.2</span>f&#125;</span>M&quot;</span>)<br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;开始训练...&quot;</span>)<br>    model.train()<br>    loss_history = []<br><br>    <span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(epochs):<br>        total_loss = <span class="hljs-number">0.0</span><br>        <span class="hljs-keyword">for</span> batch_x1, batch_y <span class="hljs-keyword">in</span> dataloader:<br>            batch_x1, batch_y = batch_x1.to(device), batch_y.to(device)<br><br>            optimizer.zero_grad()<br>            loss = flow_matching_loss(model, batch_x1, batch_y)<br><br>            loss.backward()<br>            nn.utils.clip_grad_norm_(model.parameters(), grad_clip)<br>            optimizer.step()<br><br>            total_loss += loss.item() * batch_x1.shape[<span class="hljs-number">0</span>]<br><br>        avg_loss = total_loss / <span class="hljs-built_in">len</span>(dataset)<br>        loss_history.append(avg_loss)<br>        scheduler.step()<br><br>        <span class="hljs-keyword">if</span> (epoch + <span class="hljs-number">1</span>) % <span class="hljs-number">5</span> == <span class="hljs-number">0</span>:<br>            <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Epoch [<span class="hljs-subst">&#123;epoch+<span class="hljs-number">1</span>&#125;</span>/<span class="hljs-subst">&#123;epochs&#125;</span>], 平均损失: <span class="hljs-subst">&#123;avg_loss:<span class="hljs-number">.6</span>f&#125;</span>, LR: <span class="hljs-subst">&#123;scheduler.get_last_lr()[<span class="hljs-number">0</span>]:<span class="hljs-number">.6</span>f&#125;</span>&quot;</span>)<br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;训练完成!&quot;</span>)<br>    <span class="hljs-keyword">return</span> model, loss_history, data, labels<br><br><span class="hljs-meta">@torch.no_grad()</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dit_sample</span>(<span class="hljs-params">model, num_samples=<span class="hljs-number">8</span>, class_id=<span class="hljs-number">0</span>, img_size=<span class="hljs-number">32</span>, in_channels=<span class="hljs-number">4</span>, num_steps=<span class="hljs-number">20</span>, device=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-keyword">if</span> device <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>        device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)<br><br>    model.<span class="hljs-built_in">eval</span>()<br>    <span class="hljs-comment"># 1. 初始化：从标准高斯分布采样x0（t=0）</span><br>    x = torch.randn(num_samples, in_channels, img_size, img_size, device=device)<br>    y = torch.tensor([class_id] * num_samples, device=device)<br><br>    <span class="hljs-comment"># 3. 欧拉法时间步</span><br>    dt = <span class="hljs-number">1.0</span> / num_steps<br>    t_list = torch.linspace(<span class="hljs-number">0</span>, <span class="hljs-number">1</span> - dt, num_steps, device=device)<br><br>    <span class="hljs-comment"># 4. 逐步积分求解ODE: dx/dt = v(x, t)</span><br>    <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> t_list:<br>        t_batch = torch.ones(num_samples, device=device) * t<br>        v_pred = model(x, t_batch, y)<br>        <span class="hljs-comment"># 欧拉法更新</span><br>        x = x + v_pred * dt<br><br>    <span class="hljs-keyword">return</span> x.cpu()<br></code></pre></td></tr></table></figure>
+<p><strong>解读</strong>：采样函数 <code>dit_sample</code> 实现了从纯噪声变回数据的魔法。由于 Flow Matching 的公式是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>x</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>v</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\frac{dx}{dt} = v(x, t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2251em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8801em;"><span style="top:-2.655em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">t</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">x</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.03588em;">v</span><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span>，代码中通过 <code>x = x + v_pred * dt</code> 实现了最简单的数值积分（欧拉法），每一步都沿着模型指引的方向往前走一小步 <code>dt</code>，经过 20 步就能逼近真实的图像流形。</p>
+<h2 id="可视化与执行入口">可视化与执行入口</h2>
+<p><strong>作用</strong>：将训练结果直观展示，对比真实分布和生成的分布。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># -------------------------- 可视化验证函数 --------------------------</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">visualize_all_classes</span>(<span class="hljs-params">real_samples, gen_samples, num_classes=<span class="hljs-number">4</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    对比可视化：所有类别的真实数据 vs 生成数据（放在同一张图）</span><br><span class="hljs-string">    第一行：真实图像，第二行：生成图像</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    plt.figure(figsize=(num_classes * <span class="hljs-number">3</span>, <span class="hljs-number">6</span>))<br><br>    <span class="hljs-keyword">for</span> cls_idx <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_classes):<br>        <span class="hljs-comment"># 真实数据</span><br>        plt.subplot(<span class="hljs-number">2</span>, num_classes, cls_idx + <span class="hljs-number">1</span>)<br>        plt.imshow(real_samples[cls_idx][<span class="hljs-number">0</span>], cmap=<span class="hljs-string">&#x27;viridis&#x27;</span>)<br>        plt.title(<span class="hljs-string">f&quot;True Class <span class="hljs-subst">&#123;cls_idx&#125;</span>&quot;</span>)<br>        plt.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br><br>        <span class="hljs-comment"># 生成数据</span><br>        plt.subplot(<span class="hljs-number">2</span>, num_classes, cls_idx + <span class="hljs-number">1</span> + num_classes)<br>        plt.imshow(gen_samples[cls_idx][<span class="hljs-number">0</span>], cmap=<span class="hljs-string">&#x27;viridis&#x27;</span>)<br>        plt.title(<span class="hljs-string">f&quot;Gen Class <span class="hljs-subst">&#123;cls_idx&#125;</span>&quot;</span>)<br>        plt.axis(<span class="hljs-string">&#x27;off&#x27;</span>)<br><br>    plt.tight_layout()<br>    plt.savefig(<span class="hljs-string">&quot;images/all_classes_comparison.png&quot;</span>, dpi=<span class="hljs-number">150</span>, bbox_inches=<span class="hljs-string">&#x27;tight&#x27;</span>)<br>    plt.close()<br><br><span class="hljs-comment"># 损失曲线可视化</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">plot_loss_curve</span>(<span class="hljs-params">loss_history</span>):<br>    plt.figure(figsize=(<span class="hljs-number">8</span>, <span class="hljs-number">4</span>))<br>    plt.plot(loss_history)<br>    plt.title(<span class="hljs-string">&quot;training loss curve&quot;</span>)<br>    plt.xlabel(<span class="hljs-string">&quot;Epoch&quot;</span>)<br>    plt.ylabel(<span class="hljs-string">&quot;Flow Matching Loss&quot;</span>)<br>    plt.grid(<span class="hljs-literal">True</span>, alpha=<span class="hljs-number">0.3</span>)<br>    plt.savefig(<span class="hljs-string">&quot;images/loss_curve.png&quot;</span>, dpi=<span class="hljs-number">150</span>, bbox_inches=<span class="hljs-string">&#x27;tight&#x27;</span>)<br>    plt.close()<br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    <span class="hljs-comment"># 1. 训练模型</span><br>    trained_model, loss_history, real_data, real_labels = train_dit(epochs=<span class="hljs-number">50</span>)<br><br>    <span class="hljs-comment"># 2. 绘制损失曲线，验证训练收敛性</span><br>    plot_loss_curve(loss_history)<br><br>    <span class="hljs-comment"># 3. 为每个类别生成1个样本，并收集1个真实样本</span><br>    target_classes = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]<br>    real_samples = []<br>    gen_samples = []<br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n正在生成所有类别的样本...&quot;</span>)<br>    <span class="hljs-keyword">for</span> cls <span class="hljs-keyword">in</span> target_classes:<br>        <span class="hljs-comment"># 收集1个真实样本</span><br>        real_sample = real_data[real_labels == cls][<span class="hljs-number">0</span>]<br>        real_samples.append(real_sample)<br><br>        <span class="hljs-comment"># 生成1个样本</span><br>        gen_sample = dit_sample(trained_model, num_samples=<span class="hljs-number">1</span>, class_id=cls)<br>        gen_samples.append(gen_sample[<span class="hljs-number">0</span>])<br><br>    <span class="hljs-comment"># 4. 可视化所有类别在一张图里</span><br>    visualize_all_classes(real_samples, gen_samples)<br><br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\n所有任务完成！生成的图片已保存到 images 文件夹&quot;</span>)<br></code></pre></td></tr></table></figure>
+<h2 id="训练损失和真实图像和生成图像展示">训练损失和真实图像和生成图像展示</h2>
+<p><img src="/img/%E6%89%8B%E6%92%95DiT/loss_curve.png" srcset="/img/loading.gif" lazyload alt="训练损失展示"></p>
+<p><img src="/img/%E6%89%8B%E6%92%95DiT/real_gen_comparison.png" srcset="/img/loading.gif" lazyload alt="真实图像和生成图像对比"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/DiT/" class="category-chain-item">DiT</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/DiT/" class="print-no-link">#DiT</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>手撕DiT</div>
+      <div>https://huan-yin.github.io/2026/04/09/手撕DiT/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>李相越</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年4月9日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/09/%E6%89%8B%E6%92%95MultiHeadAttention/" title="手撕 MultiHeadAttention">
+                        <span class="hidden-mobile">手撕 MultiHeadAttention</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/custom.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
