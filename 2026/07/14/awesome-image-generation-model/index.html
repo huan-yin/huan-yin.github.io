@@ -1,0 +1,1482 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/banner.png">
+  <link rel="icon" href="/img/banner.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="李相越">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="A curated list of open-source image generation models.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Awesome Image Generation Model">
+<meta property="og:url" content="https://huan-yin.github.io/2026/07/14/awesome-image-generation-model/index.html">
+<meta property="og:site_name" content="李相越的博客">
+<meta property="og:description" content="A curated list of open-source image generation models.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huan-yin.github.io/img/awesome-image-generation-model.png">
+<meta property="article:published_time" content="2026-07-14T15:29:20.000Z">
+<meta property="article:modified_time" content="2026-07-14T15:53:37.179Z">
+<meta property="article:author" content="李相越">
+<meta property="article:tag" content="DiT">
+<meta property="article:tag" content="可控图像生成">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://huan-yin.github.io/img/awesome-image-generation-model.png">
+  
+  
+  
+  <title>Awesome Image Generation Model - 李相越的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"huan-yin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":false,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Awesome Image Generation Model"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-14 23:29" pubdate>
+          2026年7月14日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          43 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Awesome Image Generation Model</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="awesome-image-generation-model">Awesome Image Generation Model</h1>
+<blockquote>
+<p>A curated list of open-source image generation models with release dates, parameters, teams, and links.</p>
+</blockquote>
+<h2 id="Contents">Contents</h2>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#2022">2022</a></li>
+<li><a href="#2023">2023</a></li>
+<li><a href="#2024">2024</a></li>
+<li><a href="#2025">2025</a></li>
+<li><a href="#2026">2026</a></li>
+</ul>
+<hr>
+<h2 id="Overview">Overview</h2>
+<p>This repository collects major open-source image generation models from 2022 to 2026, including diffusion models, autoregressive models, and hybrid architectures. Each entry includes the model name, release date, parameter count, releasing team, open-source link, and technical report.</p>
+<hr>
+<h2 id="Model-List">Model List</h2>
+<h3 id="2022">2022</h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Release Date</th>
+<th>Parameters</th>
+<th>Team</th>
+<th>Open Source Link</th>
+<th>Technical Report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable Diffusion v1.4</td>
+<td>2022-08-22</td>
+<td>0.9 B</td>
+<td>CompVis (LMU Munich), Runway, Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/CompVis/stable-diffusion">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2112.10752">arXiv</a></td>
+</tr>
+<tr>
+<td>Stable Diffusion v2.1</td>
+<td>2022-12-07</td>
+<td>0.9 B</td>
+<td>Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/stabilityai/stable-diffusion-2-1">HuggingFace</a></td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2023">2023</h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Release Date</th>
+<th>Parameters</th>
+<th>Team</th>
+<th>Open Source Link</th>
+<th>Technical Report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable Diffusion XL</td>
+<td>2023-07-26</td>
+<td>2.6 B</td>
+<td>Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2307.01952">arXiv</a></td>
+</tr>
+<tr>
+<td>PixArt-α</td>
+<td>2023-11-30</td>
+<td>0.6 B</td>
+<td>Huawei Noah’s Ark Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/PixArt-alpha/PixArt-alpha">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2310.00426">arXiv</a></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2024">2024</h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Release Date</th>
+<th>Parameters</th>
+<th>Team</th>
+<th>Open Source Link</th>
+<th>Technical Report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lumina-Next</td>
+<td>2024-05-12</td>
+<td>2 B</td>
+<td>Alpha-VLLM (OpenGVLab at Shanghai AI Lab)</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Alpha-VLLM/Lumina-T2X/tree/main/lumina_next_t2i">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2406.18583">arXiv</a></td>
+</tr>
+<tr>
+<td>Hunyuan-DiT</td>
+<td>2024-05-22</td>
+<td>1.5 B</td>
+<td>Hunyuan Team, Tencent</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tencent-Hunyuan/HunyuanDiT">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2405.08748">arXiv</a></td>
+</tr>
+<tr>
+<td>Stable Diffusion 3</td>
+<td>2024-06-12</td>
+<td>2 B</td>
+<td>Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/stabilityai/stable-diffusion-3-medium">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2403.03206">arXiv</a></td>
+</tr>
+<tr>
+<td>Kolors</td>
+<td>2024-07-06</td>
+<td>2.6 B (SDXL UNet)</td>
+<td>Kolors Team, Kuaishou</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors/blob/master/imgs/Kolors_paper.pdf">Paper</a></td>
+</tr>
+<tr>
+<td>FLUX.1</td>
+<td>2024-08-01</td>
+<td>12 B</td>
+<td>Black Forest Labs</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/black-forest-labs/flux">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://bfl.ai/blog/24-08-01-bfl">Blog</a></td>
+</tr>
+<tr>
+<td>OmniGen</td>
+<td>2024-09-17</td>
+<td>3.8 B</td>
+<td>VectorSpaceLab, Beijing Academy of Artificial Intelligence</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/VectorSpaceLab/OmniGen">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2409.11340">arXiv</a></td>
+</tr>
+<tr>
+<td>Emu3</td>
+<td>2024-09-27</td>
+<td>8.5 B</td>
+<td>Beijing Academy of Artificial Intelligence</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/baaivision/Emu3">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2409.18869">arXiv</a></td>
+</tr>
+<tr>
+<td>CogView 3</td>
+<td>2024-09-29</td>
+<td>3 B</td>
+<td>Zhipu</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/zai-org/CogView3-Plus-3B">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2403.05121">arXiv</a></td>
+</tr>
+<tr>
+<td>SANA</td>
+<td>2024-10-21</td>
+<td>0.6 B</td>
+<td>NVIDIA Research Projects</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVlabs/Sana">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.10629">arXiv</a></td>
+</tr>
+<tr>
+<td>Stable Diffusion 3.5</td>
+<td>2024-10-22</td>
+<td>2.5 B / 8 B</td>
+<td>Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/stabilityai/stable-diffusion-3.5-large">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://stability.ai/news-updates/introducing-stable-diffusion-3-5">Blog</a></td>
+</tr>
+<tr>
+<td>Infinity</td>
+<td>2024-12-05</td>
+<td>2 B / 8 B</td>
+<td>ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/FoundationVision/Infinity">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.04431">arXiv</a></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2025">2025</h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Release Date</th>
+<th>Parameters</th>
+<th>Team</th>
+<th>Open Source Link</th>
+<th>Technical Report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Janus-Pro</td>
+<td>2025-01-27</td>
+<td>1.5 B / 7 B</td>
+<td>DeepSeek</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deepseek-ai/Janus">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2501.17811">arXiv</a></td>
+</tr>
+<tr>
+<td>Lumina-Image 2.0</td>
+<td>2025-01-31</td>
+<td>2.6 B</td>
+<td>Alpha-VLLM (OpenGVLab at Shanghai AI Lab)</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Alpha-VLLM/Lumina-Image-2.0">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2503.21758">arXiv</a></td>
+</tr>
+<tr>
+<td>CogView 4</td>
+<td>2025-03-04</td>
+<td>6 B</td>
+<td>Zhipu</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/zai-org/CogView4">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/zai-org/CogView4-6B">HuggingFace</a></td>
+</tr>
+<tr>
+<td>HiDream-I1-Full</td>
+<td>2025-04-07</td>
+<td>17 B</td>
+<td>HiDream</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/HiDream-ai/HiDream-I1">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2505.22705">arXiv</a></td>
+</tr>
+<tr>
+<td>Step1X-Edit</td>
+<td>2025-04-25</td>
+<td>12 B</td>
+<td>StepFun</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/stepfun-ai/Step1X-Edit">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2504.17761">arXiv</a></td>
+</tr>
+<tr>
+<td>BLIP3-o</td>
+<td>2025-05-14</td>
+<td>4 B / 8 B</td>
+<td>Salesforce Research</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/JiuhaiChen/BLIP3o">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2505.09568">arXiv</a></td>
+</tr>
+<tr>
+<td>BAGEL</td>
+<td>2025-05-20</td>
+<td>14 B (7 B active)</td>
+<td>Seed Team, ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/bytedance-seed/BAGEL">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2505.14683">arXiv</a></td>
+</tr>
+<tr>
+<td>FLUX.1-Kontext</td>
+<td>2025-05-29</td>
+<td>12 B</td>
+<td>Black Forest Labs</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/black-forest-labs/FLUX.1-Kontext-dev">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://bfl.ai/blog/flux-1-kontext-dev">Blog</a> / <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.15742">arXiv</a></td>
+</tr>
+<tr>
+<td>UniWorld V1</td>
+<td>2025-06-03</td>
+<td>7 B Qwen 2.5 VL + 12 B FLUX.1 dev</td>
+<td>Peking University</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/PKU-YuanGroup/UniWorld">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.03147">arXiv</a></td>
+</tr>
+<tr>
+<td>OmniGen2</td>
+<td>2025-06-16</td>
+<td>3 B autoregressive + 4 B diffusion</td>
+<td>Beijing Academy of Artificial Intelligence</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/VectorSpaceLab/OmniGen2">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.18871">arXiv</a></td>
+</tr>
+<tr>
+<td>Show-o2</td>
+<td>2025-06-19</td>
+<td>1.5 B / 7 B</td>
+<td>Show Lab, National University of Singapore</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/showlab/Show-o">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.15564">arXiv</a></td>
+</tr>
+<tr>
+<td>Ovis-U1</td>
+<td>2025-06-28</td>
+<td>3 B</td>
+<td>Model-as-a-Service Team, Alibaba Token Hub</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ATH-MaaS/Ovis-U1">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.23044">arXiv</a></td>
+</tr>
+<tr>
+<td>Qwen-Image</td>
+<td>2025-08-04</td>
+<td>20 B</td>
+<td>Qwen Team, Alibaba</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/QwenLM/Qwen-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://qwen.ai/blog?id=qwen-image">Blog</a> / <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2508.02324">arXiv</a></td>
+</tr>
+<tr>
+<td>Qwen-Image-Edit</td>
+<td>2025-08-18</td>
+<td>20 B</td>
+<td>Qwen Team, Alibaba</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-Edit">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2508.02324">arXiv</a></td>
+</tr>
+<tr>
+<td>NextStep-1</td>
+<td>v1: 2025-08-18 / v1.1: 2025-12-24</td>
+<td>14 B</td>
+<td>StepFun</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/stepfun-ai/NextStep-1">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2508.10711">arXiv</a></td>
+</tr>
+<tr>
+<td>Cosmos 2</td>
+<td>2025-08-21</td>
+<td>0.6 B / 2 B / 14 B</td>
+<td>NVIDIA Research Projects</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/nvidia-cosmos/cosmos-predict2">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://research.nvidia.com/labs/cosmos/cosmos-predict2/">NVIDIA Lab</a></td>
+</tr>
+<tr>
+<td>Hunyuan Image 3.0</td>
+<td>2025-09-28</td>
+<td>80 B (13 B active)</td>
+<td>Hunyuan Team, Tencent</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tencent-Hunyuan/HunyuanImage-3.0">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2509.23951">arXiv</a></td>
+</tr>
+<tr>
+<td>DreamOmni2</td>
+<td>2025-10-09</td>
+<td>12 B (LoRA on FLUX Kontext)</td>
+<td>The Chinese University of Hong Kong, JIA Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/JIA-Lab-research/DreamOmni2">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.06679">arXiv</a></td>
+</tr>
+<tr>
+<td>BLIP3o-NEXT</td>
+<td>2025-10-17</td>
+<td>3 B</td>
+<td>Salesforce Research</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/JiuhaiChen/BLIP3o">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.15857">arXiv</a></td>
+</tr>
+<tr>
+<td>UniWorld-V2</td>
+<td>2025-10-19</td>
+<td>12 B / 20 B</td>
+<td>Peking University</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/PKU-YuanGroup/UniWorld">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.16888">arXiv</a></td>
+</tr>
+<tr>
+<td>Emu3.5</td>
+<td>2025-10-30</td>
+<td>34 B</td>
+<td>Beijing Academy of Artificial Intelligence</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/baaivision/Emu3.5">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.26583">arXiv</a></td>
+</tr>
+<tr>
+<td>InfinityStar</td>
+<td>2025-11-07</td>
+<td>8 B</td>
+<td>ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/FoundationVision/InfinityStar">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.04675">arXiv</a></td>
+</tr>
+<tr>
+<td>FLUX 2</td>
+<td>2025-11-25</td>
+<td>32 B</td>
+<td>Black Forest Labs</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/black-forest-labs/FLUX.2-dev">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://bfl.ai/blog/flux-2">Blog</a> / <a target="_blank" rel="noopener" href="https://bfl.ai/research/representation-comparison">Research</a></td>
+</tr>
+<tr>
+<td>Ovis-Image</td>
+<td>2025-11-29</td>
+<td>7 B</td>
+<td>Model-as-a-Service Team, Alibaba Token Hub</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ATH-MaaS/Ovis-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.22982">arXiv</a></td>
+</tr>
+<tr>
+<td>Z-Image</td>
+<td>2025-11-26</td>
+<td>7 B</td>
+<td>Tongyi-MAI, Alibaba</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tongyi-MAI/Z-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.22699">arXiv</a></td>
+</tr>
+<tr>
+<td>NewBie-image-Exp0.1</td>
+<td>2025-12-05</td>
+<td>3.5 B</td>
+<td>NewBieAI-Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NewBieAI-Lab/NewBie-image-Exp0.1">GitHub</a></td>
+<td>None</td>
+</tr>
+<tr>
+<td>LongCat Image</td>
+<td>2025-12-05</td>
+<td>6 B</td>
+<td>LongCat Team, Meituan</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/meituan-longcat/LongCat-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2512.07584">arXiv</a></td>
+</tr>
+<tr>
+<td>Qwen-Image-Edit-2511</td>
+<td>2025-12-23</td>
+<td>20 B</td>
+<td>Qwen Team, Alibaba</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-Edit-2511">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2508.02324">arXiv</a></td>
+</tr>
+<tr>
+<td>DreamOmni3</td>
+<td>2025-12-27</td>
+<td>12 B (LoRA on FLUX Kontext)</td>
+<td>The Chinese University of Hong Kong, JIA Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/JIA-Lab-research/DreamOmni3">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2512.22525">arXiv</a></td>
+</tr>
+<tr>
+<td>Qwen-Image-2512</td>
+<td>2025-12-31</td>
+<td>20 B</td>
+<td>Qwen Team, Alibaba</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-2512">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2508.02324">arXiv</a></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="2026">2026</h3>
+<table>
+<thead>
+<tr>
+<th>Model Name</th>
+<th>Release Date</th>
+<th>Parameters</th>
+<th>Team</th>
+<th>Open Source Link</th>
+<th>Technical Report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GLM Image</td>
+<td>2026-01-14</td>
+<td>9 B autoregressive + 7 B diffusion</td>
+<td>Zhipu</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/zai-org/GLM-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://z.ai/blog/glm-image">Blog</a></td>
+</tr>
+<tr>
+<td>FLUX 2 Klein</td>
+<td>2026-01-15</td>
+<td>4 B / 9 B</td>
+<td>Black Forest Labs</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/black-forest-labs/FLUX.2-klein-9B">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://bfl.ai/blog/flux2-klein-towards-interactive-visual-intelligence">Blog</a></td>
+</tr>
+<tr>
+<td>TeleStyle</td>
+<td>v1: 2026-01-28 / v2: 2026-06-10</td>
+<td>20 B (LoRA on Qwen-Image-Edit)</td>
+<td>Institute of Artificial Intelligence, China Telecom (TeleAI)</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tele-AI/TeleStyle">GitHub v1</a> / <a target="_blank" rel="noopener" href="https://github.com/Tele-AI/TeleStyleV2">GitHub v2</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2601.20175">arXiv v1</a> / <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2606.20709">arXiv v2</a></td>
+</tr>
+<tr>
+<td>Qwen-Image 2.0</td>
+<td>2026-02-10 / 2026-04-22 / 2026-06-22</td>
+<td>7 B</td>
+<td>Qwen Team, Alibaba</td>
+<td>None</td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.10730">arXiv</a></td>
+</tr>
+<tr>
+<td>FireRed-Image-Edit</td>
+<td>v1: 2026-02-14 / v1.1: 2026-03-03</td>
+<td>20 B (LoRA on Qwen-Image-Edit)</td>
+<td>Super Intelligence Team, Xiaohongshu</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/FireRedTeam/FireRed-Image-Edit">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2602.13344">arXiv</a></td>
+</tr>
+<tr>
+<td>InternVL-U</td>
+<td>2026-03-06</td>
+<td>4 B</td>
+<td>Shanghai AI Laboratory</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/OpenGVLab/InternVL-U">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2603.09877">arXiv</a></td>
+</tr>
+<tr>
+<td>DreamLite</td>
+<td>2026-03-30</td>
+<td>0.39 B</td>
+<td>Intelligent Creation Lab, ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ByteVisionLab/DreamLite">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2603.28713">arXiv</a></td>
+</tr>
+<tr>
+<td>JoyAI Image</td>
+<td>edit: 2026-04-02 / edit-plus: 2026-06-23</td>
+<td>16 B</td>
+<td>Joy Future Academy, JD</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/jd-opensource/JoyAI-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.04128">arXiv</a></td>
+</tr>
+<tr>
+<td>PixelDiT</td>
+<td>2026-04-07</td>
+<td>1.3 B</td>
+<td>NVIDIA</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVlabs/PixelDiT">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.20645">arXiv</a></td>
+</tr>
+<tr>
+<td>Nucleus-Image</td>
+<td>2026-04-14</td>
+<td>17 B (2 B active)</td>
+<td>Nucleus AI</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/NucleusAI/Nucleus-Image">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2604.12163">arXiv</a></td>
+</tr>
+<tr>
+<td>GRN</td>
+<td>2026-04-14</td>
+<td>2 B</td>
+<td>ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/bytedance/GRN">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2604.13030">arXiv</a></td>
+</tr>
+<tr>
+<td>ERNIE Image</td>
+<td>2026-04-15</td>
+<td>8 B</td>
+<td>Baidu</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/baidu/ERNIE-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://yiyan.baidu.com/blog/posts/ernie-image">Blog</a></td>
+</tr>
+<tr>
+<td>SenseNova-U1</td>
+<td>2026-04-27</td>
+<td>8 B</td>
+<td>SenseNova</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/OpenSenseNova/SenseNova-U1">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.12500">arXiv</a></td>
+</tr>
+<tr>
+<td>HiDream-O1-Image</td>
+<td>2026-05-08</td>
+<td>8 B</td>
+<td>HiDream</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/HiDream-ai/HiDream-O1-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.11061v1">arXiv</a></td>
+</tr>
+<tr>
+<td>Anima</td>
+<td>2026-05-15</td>
+<td>2 B</td>
+<td>CircleStone Labs</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/circlestone-labs/Anima">HuggingFace</a></td>
+<td>None</td>
+</tr>
+<tr>
+<td>Lance</td>
+<td>2026-05-18</td>
+<td>3 B</td>
+<td>Intelligent Creation Lab, ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/bytedance/Lance">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.18678">arXiv</a></td>
+</tr>
+<tr>
+<td>Lens</td>
+<td>2026-05-20</td>
+<td>3.8 B</td>
+<td>Microsoft</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/Comfy-Org/Lens">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.21573">arXiv</a></td>
+</tr>
+<tr>
+<td>Cosmos 3</td>
+<td>2026-05-31</td>
+<td>64 B</td>
+<td>NVIDIA Research Projects</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/NVIDIA/cosmos">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://research.nvidia.com/labs/cosmos3/technical-report.pdf">NVIDIA Lab</a></td>
+</tr>
+<tr>
+<td>Ideogram 4</td>
+<td>2026-06-03</td>
+<td>9.3 B</td>
+<td>Ideogram</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ideogram-oss/ideogram4">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://ideogram.ai/blog/ideogram-4.0/">Blog</a></td>
+</tr>
+<tr>
+<td>i1</td>
+<td>2026-06-09</td>
+<td>3 B</td>
+<td>Princeton University</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/zlab-princeton/i1">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2606.11289">arXiv</a></td>
+</tr>
+<tr>
+<td>Boogu-Image-0.1</td>
+<td>2026-06-16</td>
+<td>10 B</td>
+<td>Boogu</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/boogu-project/Boogu-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://boogu.org/">Website</a></td>
+</tr>
+<tr>
+<td>MiniT2I</td>
+<td>2026-06-17</td>
+<td>B/16: 0.258 B / L/16: 0.912 B</td>
+<td>MIT (Kaiming He)</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Hope7Happiness/minit2i-torch">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://peppakai8.github.io/#/post/minit2i">Project Page</a></td>
+</tr>
+<tr>
+<td>SeFi Image</td>
+<td>2026-06-21</td>
+<td>1 B / 2 B / 5 B</td>
+<td>SeFi Image Team</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/jmliu206/SeFi-Image">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2606.22568">arXiv</a></td>
+</tr>
+<tr>
+<td>Krea 2</td>
+<td>2026-06-23</td>
+<td>12 B</td>
+<td>Krea AI</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/krea-ai/krea-2">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://krea.ai/blog/krea-2-technical-report">Blog</a></td>
+</tr>
+<tr>
+<td>SenseNova-Vision</td>
+<td>2026-07-08</td>
+<td>14 B (7 B active, BAGEL backbone)</td>
+<td>SenseNova</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/OpenSenseNova/SenseNova-Vision">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2607.06560">arXiv</a></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="License">License</h2>
+<p>This repository is for informational purposes only. Each model has its own license — please refer to the respective open-source links for license details.</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" class="category-chain-item">图像生成</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/DiT/" class="print-no-link">#DiT</a>
+      
+        <a href="/tags/%E5%8F%AF%E6%8E%A7%E5%9B%BE%E5%83%8F%E7%94%9F%E6%88%90/" class="print-no-link">#可控图像生成</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Awesome Image Generation Model</div>
+      <div>https://huan-yin.github.io/2026/07/14/awesome-image-generation-model/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>李相越</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月14日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/22/%E5%88%9D%E8%AF%86Qwen%E7%9A%84VL%E7%B3%BB%E5%88%97%E6%A8%A1%E5%9E%8B/" title="初识Qwen的VL系列模型">
+                        <span class="hidden-mobile">初识Qwen的VL系列模型</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/custom.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
