@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://huan-yin.github.io/img/awesome-image-generation-model.png">
 <meta property="article:published_time" content="2026-07-14T15:29:20.000Z">
-<meta property="article:modified_time" content="2026-07-14T15:53:37.179Z">
+<meta property="article:modified_time" content="2026-07-16T12:56:42.016Z">
 <meta property="article:author" content="李相越">
 <meta property="article:tag" content="DiT">
 <meta property="article:tag" content="可控图像生成">
@@ -331,7 +331,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.1k 字
+          6.3k 字
         
       </span>
     
@@ -342,7 +342,7 @@
         
         
         
-          43 分钟
+          53 分钟
         
       </span>
     
@@ -403,8 +403,7 @@
 <h2 id="Overview">Overview</h2>
 <p>This repository collects major open-source image generation models from 2022 to 2026, including diffusion models, autoregressive models, and hybrid architectures. Each entry includes the model name, release date, parameter count, releasing team, open-source link, and technical report.</p>
 <hr>
-<h2 id="Model-List">Model List</h2>
-<h3 id="2022">2022</h3>
+<h2 id="2022">2022</h2>
 <table>
 <thead>
 <tr>
@@ -418,7 +417,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Stable Diffusion v1.4</td>
+<td>Stable Diffusion v1.5</td>
 <td>2022-08-22</td>
 <td>0.9 B</td>
 <td>CompVis (LMU Munich), Runway, Stability AI</td>
@@ -436,7 +435,7 @@
 </tbody>
 </table>
 <hr>
-<h3 id="2023">2023</h3>
+<h2 id="2023">2023</h2>
 <table>
 <thead>
 <tr>
@@ -449,6 +448,14 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>DeepFloyd IF</td>
+<td>2023-04-29</td>
+<td>4.3 B</td>
+<td>Stability AI</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/deep-floyd/IF">GitHub</a></td>
+<td>Reproduction of Imagen</td>
+</tr>
 <tr>
 <td>Stable Diffusion XL</td>
 <td>2023-07-26</td>
@@ -468,7 +475,7 @@
 </tbody>
 </table>
 <hr>
-<h3 id="2024">2024</h3>
+<h2 id="2024">2024</h2>
 <table>
 <thead>
 <tr>
@@ -482,12 +489,36 @@
 </thead>
 <tbody>
 <tr>
+<td>Playground v2.5</td>
+<td>2024-02-28</td>
+<td>2.6 B <br />(Stable Diffusion XL)</td>
+<td>Playground</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/playgroundai/playground-v2.5-1024px-aesthetic">HuggingFace</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2402.17245">arXiv</a></td>
+</tr>
+<tr>
+<td>PixArt-Σ</td>
+<td>2024-04-07</td>
+<td>0.6 B</td>
+<td>Huawei Noah’s Ark Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/PixArt-alpha/PixArt-sigma">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2403.04692">arXiv</a></td>
+</tr>
+<tr>
 <td>Lumina-Next</td>
 <td>2024-05-12</td>
 <td>2 B</td>
 <td>Alpha-VLLM (OpenGVLab at Shanghai AI Lab)</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/Alpha-VLLM/Lumina-T2X/tree/main/lumina_next_t2i">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2406.18583">arXiv</a></td>
+</tr>
+<tr>
+<td>Chameleon</td>
+<td>2024-05-16</td>
+<td>7 B / 34 B</td>
+<td>Meta</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/facebookresearch/chameleon">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2405.09818">arXiv</a></td>
 </tr>
 <tr>
 <td>Hunyuan-DiT</td>
@@ -508,7 +539,7 @@
 <tr>
 <td>Kolors</td>
 <td>2024-07-06</td>
-<td>2.6 B (SDXL UNet)</td>
+<td>2.6 B<br /> (SDXL UNet)</td>
 <td>Kolors Team, Kuaishou</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://github.com/Kwai-Kolors/Kolors/blob/master/imgs/Kolors_paper.pdf">Paper</a></td>
@@ -547,11 +578,11 @@
 </tr>
 <tr>
 <td>SANA</td>
-<td>2024-10-21</td>
-<td>0.6 B</td>
+<td>v1: 2024-10-21<br /> v1.5: 2025-01-29<br /> Sprint: 2025-03-14</td>
+<td>v1: 1.6 B <br />v1.5: 4.8 B</td>
 <td>NVIDIA Research Projects</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/NVlabs/Sana">GitHub</a></td>
-<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.10629">arXiv</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2410.10629">arXiv v1</a> <br /> <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2501.18427">arXiv v1.5</a> <br /><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2503.09641">arXiv Sprint</a></td>
 </tr>
 <tr>
 <td>Stable Diffusion 3.5</td>
@@ -569,10 +600,18 @@
 <td><a target="_blank" rel="noopener" href="https://github.com/FoundationVision/Infinity">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.04431">arXiv</a></td>
 </tr>
+<tr>
+<td>Tokenflow</td>
+<td>2024-12-09</td>
+<td>13 B / 14 B</td>
+<td>ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/ByteVisionLab/TokenFlow">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2412.03069">arXiv</a></td>
+</tr>
 </tbody>
 </table>
 <hr>
-<h3 id="2025">2025</h3>
+<h2 id="2025">2025</h2>
 <table>
 <thead>
 <tr>
@@ -642,6 +681,14 @@
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2505.14683">arXiv</a></td>
 </tr>
 <tr>
+<td>MMaDA</td>
+<td>2025-05-21</td>
+<td>8 B (LLaDA)</td>
+<td>Seed Team, ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Gen-Verse/MMaDA">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2505.15809">arXiv</a></td>
+</tr>
+<tr>
 <td>FLUX.1-Kontext</td>
 <td>2025-05-29</td>
 <td>12 B</td>
@@ -682,6 +729,14 @@
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.23044">arXiv</a></td>
 </tr>
 <tr>
+<td>Chroma1</td>
+<td>2025-07-29</td>
+<td>8.9 B <br />(built on FLUX.1 architecture)</td>
+<td>lodestones</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/lodestones/Chroma1-HD">HuggingFace</a></td>
+<td>None</td>
+</tr>
+<tr>
 <td>Qwen-Image</td>
 <td>2025-08-04</td>
 <td>20 B</td>
@@ -691,7 +746,7 @@
 </tr>
 <tr>
 <td>Qwen-Image-Edit</td>
-<td>2025-08-18</td>
+<td>2025-08-18 <br /> v2509: 2025-09-22 <br />v2511: 2025-11-22</td>
 <td>20 B</td>
 <td>Qwen Team, Alibaba</td>
 <td><a target="_blank" rel="noopener" href="https://huggingface.co/Qwen/Qwen-Image-Edit">HuggingFace</a></td>
@@ -699,7 +754,7 @@
 </tr>
 <tr>
 <td>NextStep-1</td>
-<td>v1: 2025-08-18 / v1.1: 2025-12-24</td>
+<td>v1: 2025-08-18 <br />v1.1: 2025-12-24</td>
 <td>14 B</td>
 <td>StepFun</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/stepfun-ai/NextStep-1">GitHub</a></td>
@@ -714,6 +769,30 @@
 <td><a target="_blank" rel="noopener" href="https://research.nvidia.com/labs/cosmos/cosmos-predict2/">NVIDIA Lab</a></td>
 </tr>
 <tr>
+<td>SRPO</td>
+<td>2025-09-08</td>
+<td>12 B <br />(FLUX.1 dev)</td>
+<td>Hunyuan Team, Tencent</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tencent-Hunyuan/SRPO">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2509.06942">arXiv</a></td>
+</tr>
+<tr>
+<td>Hunyuan Image 2.1</td>
+<td>2025-09-08</td>
+<td>17 B</td>
+<td>Hunyuan Team, Tencent</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Tencent-Hunyuan/HunyuanImage-2.1">GitHub</a></td>
+<td>None</td>
+</tr>
+<tr>
+<td>Lumina-DiMOO</td>
+<td>2025-09-10</td>
+<td>8 B</td>
+<td>Alpha-VLLM (OpenGVLab at Shanghai AI Lab)</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Alpha-VLLM/Lumina-DiMOO">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.06308">arXiv</a></td>
+</tr>
+<tr>
 <td>Hunyuan Image 3.0</td>
 <td>2025-09-28</td>
 <td>80 B (13 B active)</td>
@@ -724,7 +803,7 @@
 <tr>
 <td>DreamOmni2</td>
 <td>2025-10-09</td>
-<td>12 B (LoRA on FLUX Kontext)</td>
+<td>12 B <br />(LoRA on FLUX Kontext)</td>
 <td>The Chinese University of Hong Kong, JIA Lab</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/JIA-Lab-research/DreamOmni2">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.06679">arXiv</a></td>
@@ -746,6 +825,14 @@
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.16888">arXiv</a></td>
 </tr>
 <tr>
+<td>FIBO</td>
+<td>2025-10-29</td>
+<td>8 B</td>
+<td>BRIA AI</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Bria-AI/FIBO">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.06876">arXiv</a></td>
+</tr>
+<tr>
 <td>Emu3.5</td>
 <td>2025-10-30</td>
 <td>34 B</td>
@@ -760,6 +847,22 @@
 <td>ByteDance</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/FoundationVision/InfinityStar">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.04675">arXiv</a></td>
+</tr>
+<tr>
+<td>PRX</td>
+<td>2025-11-11 <br />PRXpixel: 2026-06-11</td>
+<td>1.3 B</td>
+<td>Photoroom</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/Photoroom/PRX">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/blog/photoroom/prx-open-source-t2i-model">HuggingFace Blog</a></td>
+</tr>
+<tr>
+<td>Kandinsky 5.0 Lite T2I</td>
+<td>2025-11-15</td>
+<td>6 B</td>
+<td>Kandinsky Lab</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/kandinsky-lab/Kandinsky-5">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2511.14993">arXiv</a></td>
 </tr>
 <tr>
 <td>FLUX 2</td>
@@ -812,7 +915,7 @@
 <tr>
 <td>DreamOmni3</td>
 <td>2025-12-27</td>
-<td>12 B (LoRA on FLUX Kontext)</td>
+<td>12 B <br />(LoRA on FLUX Kontext)</td>
 <td>The Chinese University of Hong Kong, JIA Lab</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/JIA-Lab-research/DreamOmni3">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2512.22525">arXiv</a></td>
@@ -828,7 +931,7 @@
 </tbody>
 </table>
 <hr>
-<h3 id="2026">2026</h3>
+<h2 id="2026">2026</h2>
 <table>
 <thead>
 <tr>
@@ -841,6 +944,14 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>UniPic-3</td>
+<td>2026-01-09</td>
+<td>20 B <br />(Qwen Image)</td>
+<td>Skywork</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/SkyworkAI/UniPic">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2601.15664">arXiv</a></td>
+</tr>
 <tr>
 <td>GLM Image</td>
 <td>2026-01-14</td>
@@ -859,8 +970,8 @@
 </tr>
 <tr>
 <td>TeleStyle</td>
-<td>v1: 2026-01-28 / v2: 2026-06-10</td>
-<td>20 B (LoRA on Qwen-Image-Edit)</td>
+<td>v1: 2026-01-28 <br />v2: 2026-06-10</td>
+<td>20 B <br />(LoRA on Qwen-Image-Edit)</td>
 <td>Institute of Artificial Intelligence, China Telecom (TeleAI)</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/Tele-AI/TeleStyle">GitHub v1</a> / <a target="_blank" rel="noopener" href="https://github.com/Tele-AI/TeleStyleV2">GitHub v2</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2601.20175">arXiv v1</a> / <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2606.20709">arXiv v2</a></td>
@@ -874,12 +985,28 @@
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.10730">arXiv</a></td>
 </tr>
 <tr>
+<td>Ming 2.0</td>
+<td>2026-02-11</td>
+<td>100 B (6 B active)</td>
+<td>inclusionAI, Ant Group</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/inclusionAI/Ming">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2506.09344">arXiv</a> / <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2510.24821">arXiv</a></td>
+</tr>
+<tr>
 <td>FireRed-Image-Edit</td>
-<td>v1: 2026-02-14 / v1.1: 2026-03-03</td>
-<td>20 B (LoRA on Qwen-Image-Edit)</td>
+<td>v1: 2026-02-14 /<br />v1.1: 2026-03-03</td>
+<td>20 B <br />(LoRA on Qwen-Image-Edit)</td>
 <td>Super Intelligence Team, Xiaohongshu</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/FireRedTeam/FireRed-Image-Edit">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2602.13344">arXiv</a></td>
+</tr>
+<tr>
+<td>BitDance</td>
+<td>2026-02-17</td>
+<td>14 B</td>
+<td>ByteDance</td>
+<td><a target="_blank" rel="noopener" href="https://github.com/shallowdream204/BitDance">GitHub</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2602.14041">arXiv</a></td>
 </tr>
 <tr>
 <td>InternVL-U</td>
@@ -899,7 +1026,7 @@
 </tr>
 <tr>
 <td>JoyAI Image</td>
-<td>edit: 2026-04-02 / edit-plus: 2026-06-23</td>
+<td>edit: 2026-04-02<br /> edit-plus: 2026-06-23</td>
 <td>16 B</td>
 <td>Joy Future Academy, JD</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/jd-opensource/JoyAI-Image">GitHub</a></td>
@@ -978,6 +1105,14 @@
 <td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2605.21573">arXiv</a></td>
 </tr>
 <tr>
+<td>Bonsai Image</td>
+<td>2026-05-26</td>
+<td>1-bit FLUX.2 Klein 4 B</td>
+<td>PrismML</td>
+<td><a target="_blank" rel="noopener" href="https://huggingface.co/collections/prism-ml/bonsai-image">HuggingFace</a></td>
+<td>None</td>
+</tr>
+<tr>
 <td>Cosmos 3</td>
 <td>2026-05-31</td>
 <td>64 B</td>
@@ -1005,14 +1140,14 @@
 <td>Boogu-Image-0.1</td>
 <td>2026-06-16</td>
 <td>10 B</td>
-<td>Boogu</td>
+<td>Celia Lab, Huawei</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/boogu-project/Boogu-Image">GitHub</a></td>
-<td><a target="_blank" rel="noopener" href="https://boogu.org/">Website</a></td>
+<td><a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2607.13125">arXiv</a></td>
 </tr>
 <tr>
 <td>MiniT2I</td>
 <td>2026-06-17</td>
-<td>B/16: 0.258 B / L/16: 0.912 B</td>
+<td>B/16: 0.258 B <br /> L/16: 0.912 B</td>
 <td>MIT (Kaiming He)</td>
 <td><a target="_blank" rel="noopener" href="https://github.com/Hope7Happiness/minit2i-torch">GitHub</a></td>
 <td><a target="_blank" rel="noopener" href="https://peppakai8.github.io/#/post/minit2i">Project Page</a></td>
@@ -1046,6 +1181,8 @@
 <hr>
 <h2 id="License">License</h2>
 <p>This repository is for informational purposes only. Each model has its own license — please refer to the respective open-source links for license details.</p>
+<h2 id="Contributing">Contributing</h2>
+<p>Contributions are welcome! If you’d like to add a new model or update an existing entry, please submit a pull request.</p>
 
                 
               </div>
@@ -1137,6 +1274,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/2026/07/16/awesome-reference-image-generation/" title="Awesome Reference Image Generation">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Awesome Reference Image Generation</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
