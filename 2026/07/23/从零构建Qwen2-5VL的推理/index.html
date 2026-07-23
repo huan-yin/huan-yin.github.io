@@ -1,0 +1,1563 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/banner.png">
+  <link rel="icon" href="/img/banner.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="李相越">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="从零构建Qwen2.5VL的推理，分析前向传播的shape变化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零构建Qwen2.5VL的推理">
+<meta property="og:url" content="https://huan-yin.github.io/2026/07/23/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2-5VL%E7%9A%84%E6%8E%A8%E7%90%86/index.html">
+<meta property="og:site_name" content="李相越的博客">
+<meta property="og:description" content="从零构建Qwen2.5VL的推理，分析前向传播的shape变化">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huan-yin.github.io/img/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2.5VL%E7%9A%84%E6%8E%A8%E7%90%86/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2.5VL%E7%9A%84%E6%8E%A8%E7%90%86.png">
+<meta property="article:published_time" content="2026-07-23T13:48:53.000Z">
+<meta property="article:modified_time" content="2026-07-23T14:05:52.432Z">
+<meta property="article:author" content="李相越">
+<meta property="article:tag" content="VLM">
+<meta property="article:tag" content="多模态">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://huan-yin.github.io/img/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2.5VL%E7%9A%84%E6%8E%A8%E7%90%86/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2.5VL%E7%9A%84%E6%8E%A8%E7%90%86.png">
+  
+  
+  
+  <title>从零构建Qwen2.5VL的推理 - 李相越的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"huan-yin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":false,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从零构建Qwen2.5VL的推理"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-23 21:48" pubdate>
+          2026年7月23日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          17k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          143 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从零构建Qwen2.5VL的推理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="从零构建qwen2.5vl的推理">从零构建Qwen2.5VL的推理</h1>
+<blockquote>
+<p>本文讲解如何仅用 <code>torch.nn.Module</code> 从零搭建 <strong>Qwen2.5-VL-3B-Instruct</strong> 多模态大模型——<br>
+不调用任何现成的 <code>Qwen2_5_VLForConditionalGeneration</code> / <code>Qwen2_5_VLProcessor</code>，而是手写<br>
+每一层：视觉编码器、语言模型、视觉-语言连接器、M-RoPE、KV cache、生成循环，再直接从<br>
+HuggingFace safetensors checkpoint 加载预训练权重，从而产出真实输出。完整项目代码在：<a target="_blank" rel="noopener" href="https://github.com/huan-yin/Qwen2.5VL-from-scratch">https://github.com/huan-yin/Qwen2.5VL-from-scratch</a></p>
+<p>文中所有 shape 均以 <strong><code>example.png</code> (1024×1024) + prompt <code>&quot;Describe this image.&quot;</code></strong> 为例，<br>
+并通过实际运行真实模型（加载预训练权重、bfloat16、CUDA）验证，非纸面推算。</p>
+</blockquote>
+<hr>
+<h2 id="目录">目录</h2>
+<ol>
+<li><a href="#1-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BA%E9%9C%80%E8%A6%81%E5%93%AA%E4%BA%9B%E9%83%A8%E4%BB%B6">整体架构：从零构建需要哪些部件</a></li>
+<li><a href="#2-%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE">模型配置</a></li>
+<li><a href="#3-%E9%83%A8%E4%BB%B6%E4%B8%80%E5%9B%BE%E5%83%8F%E9%A2%84%E5%A4%84%E7%90%86">部件一：图像预处理</a></li>
+<li><a href="#4-%E9%83%A8%E4%BB%B6%E4%BA%8C%E8%A7%86%E8%A7%89%E7%BC%96%E7%A0%81%E5%99%A8">部件二：视觉编码器</a></li>
+<li><a href="#5-%E9%83%A8%E4%BB%B6%E4%B8%89%E5%A4%9A%E6%A8%A1%E6%80%81%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81-m-rope">部件三：多模态位置编码 M-RoPE</a></li>
+<li><a href="#6-%E9%83%A8%E4%BB%B6%E5%9B%9B%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B">部件四：语言模型</a></li>
+<li><a href="#7-%E9%83%A8%E4%BB%B6%E4%BA%94%E8%A7%86%E8%A7%89-%E8%AF%AD%E8%A8%80%E8%9E%8D%E5%90%88%E4%B8%8E%E7%94%9F%E6%88%90">部件五：视觉-语言融合与生成</a></li>
+<li><a href="#8-%E5%AE%8C%E6%95%B4%E5%89%8D%E5%90%91%E4%BC%A0%E6%92%AD-shape-%E8%BF%BD%E8%B8%AA%E5%B7%B2%E9%AA%8C%E8%AF%81">完整前向传播 Shape 追踪（已验证）</a></li>
+<li><a href="#9-%E5%85%B3%E9%94%AE%E8%AE%BE%E8%AE%A1%E8%A6%81%E7%82%B9">关键设计要点</a></li>
+</ol>
+<hr>
+<h2 id="1-整体架构：从零构建需要哪些部件">1. 整体架构：从零构建需要哪些部件</h2>
+<p>Qwen2.5-VL 是一个<strong>视觉-语言多模态自回归模型</strong>。从零构建它，需要依次实现下面 6 个部件：</p>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs inform7">┌──────────────────────────────────────────────────────────────┐<br>│  图像  ──▶ <span class="hljs-comment">[1 预处理]</span> ──▶ pixel_values                        │<br>│                            │                                  │<br>│                            ▼                                  │<br>│                   <span class="hljs-comment">[2 视觉编码器]</span>                               │<br>│              PatchEmbed → 32×(窗口/全局 Attn+MLP)              │<br>│              → 2×2 Merger ──▶ 视觉 embedding (1369, 2048)     │<br>│                            │                                  │<br>│  文本 prompt ──▶ tokenize + chat 模板 + image_pad 展开          │<br>│                            │                                  │<br>│                            ▼                                  │<br>│                   <span class="hljs-comment">[5 融合]</span> masked_scatter 把视觉向量           │<br>│                   塞进 &lt;|image_pad|&gt; 占位 ──▶ inputs_embeds   │<br>│                            │                                  │<br>│                   <span class="hljs-comment">[3 M-RoPE]</span> 构造 (3, L) 三维位置              │<br>│                            │                                  │<br>│                            ▼                                  │<br>│                   <span class="hljs-comment">[4 语言模型]</span> 36×(GQA Attn+SwiGLU)            │<br>│                            │                                  │<br>│                   <span class="hljs-comment">[6 生成]</span> prefill 建 KV cache → 逐 token 解码 │<br>└──────────────────────────────────────────────────────────────┘<br></code></pre></td></tr></table></figure>
+<p>构建顺序遵循数据流：先把图像变成视觉 token，再把图文拼成一条序列，最后让 LLM 自回归生成。</p>
+<hr>
+<h2 id="2-模型配置">2. 模型配置</h2>
+<p>所有超参硬编码为常量，与 <code>Qwen/Qwen2.5-VL-3B-Instruct</code> 的 <code>config.json</code> 一致。</p>
+<h3 id="视觉-V">视觉 (<code>V</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>depth</td>
+<td>32</td>
+<td>ViT 层数</td>
+</tr>
+<tr>
+<td>hidden_size</td>
+<td>1280</td>
+<td>视觉隐藏维度</td>
+</tr>
+<tr>
+<td>intermediate_size</td>
+<td>3420</td>
+<td>MLP 中间维度</td>
+</tr>
+<tr>
+<td>num_heads</td>
+<td>16</td>
+<td>head_dim = 1280/16 = <strong>80</strong></td>
+</tr>
+<tr>
+<td>in_chans</td>
+<td>3</td>
+<td>RGB</td>
+</tr>
+<tr>
+<td>out_hidden_size</td>
+<td>2048</td>
+<td>对齐 LLM 隐藏维度</td>
+</tr>
+<tr>
+<td>patch_size</td>
+<td>14</td>
+<td>空间 patch 边长</td>
+</tr>
+<tr>
+<td>temporal_patch_size</td>
+<td>2</td>
+<td>时间 patch 边长（静态图复制成 2 帧）</td>
+</tr>
+<tr>
+<td>spatial_merge_size</td>
+<td>2</td>
+<td>2×2 空间合并</td>
+</tr>
+<tr>
+<td>window_size</td>
+<td>112</td>
+<td>窗口注意力窗口大小</td>
+</tr>
+<tr>
+<td>fullatt</td>
+<td>(7,15,23,31)</td>
+<td>这几层全局注意力，其余窗口注意力</td>
+</tr>
+</tbody>
+</table>
+<h3 id="语言-T">语言 (<code>T</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hidden_size</td>
+<td>2048</td>
+<td>LLM 隐藏维度</td>
+</tr>
+<tr>
+<td>num_layers</td>
+<td>36</td>
+<td>解码器层数</td>
+</tr>
+<tr>
+<td>num_heads</td>
+<td>16</td>
+<td>query 头数</td>
+</tr>
+<tr>
+<td>num_kv_heads</td>
+<td>2</td>
+<td>KV 头数（GQA 分组数 = 16/2 = 8）</td>
+</tr>
+<tr>
+<td>intermediate_size</td>
+<td>11008</td>
+<td>MLP 中间维度</td>
+</tr>
+<tr>
+<td>vocab_size</td>
+<td>151936</td>
+<td>词表大小</td>
+</tr>
+<tr>
+<td>rms_eps</td>
+<td>1e-6</td>
+<td>RMSNorm eps</td>
+</tr>
+<tr>
+<td>rope_theta</td>
+<td>1,000,000</td>
+<td>RoPE base</td>
+</tr>
+<tr>
+<td>mrope_section</td>
+<td>(16,24,24)</td>
+<td>M-RoPE 时间/高/宽 通道划分</td>
+</tr>
+</tbody>
+</table>
+<p>派生常量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">HEAD_DIM = T.hidden_size // T.num_heads   <span class="hljs-comment"># 128  (语言模型头维度)</span><br>MERGE    = V.spatial_merge_size           <span class="hljs-comment"># 2</span><br>SMU      = MERGE * MERGE                  <span class="hljs-comment"># 4    (每个合并块含 4 个 patch token)</span><br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="3-部件一：图像预处理">3. 部件一：图像预处理</h2>
+<p>目标：把一张 PIL 图变成模型输入 <code>pixel_values</code>，并把图文拼成 token 序列。</p>
+<p>本文全程使用示例图 <code>example.png</code>（原图 1024×1024）：</p>
+<p><img src="/img/%E4%BB%8E%E9%9B%B6%E6%9E%84%E5%BB%BAQwen2.5VL%E7%9A%84%E6%8E%A8%E7%90%86/example.png" srcset="/img/loading.gif" lazyload alt="example.png"></p>
+<p><em>示例图 <code>example.png</code>（1024×1024），用于下文所有 shape 追踪。</em></p>
+<h3 id="3-1-smart-resize：保持长宽比，两边整除-28">3.1 smart_resize：保持长宽比，两边整除 28</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">smart_resize</span>(<span class="hljs-params">h, w, factor=<span class="hljs-number">28</span>, min_px=<span class="hljs-number">56</span>*<span class="hljs-number">56</span>, max_px=<span class="hljs-number">12845056</span></span>):<br>    h_bar = <span class="hljs-built_in">round</span>(h / factor) * factor<br>    w_bar = <span class="hljs-built_in">round</span>(w / factor) * factor<br>    <span class="hljs-keyword">if</span> h_bar * w_bar &gt; max_px:        <span class="hljs-comment"># 超像素上限：按比例缩</span><br>        b = math.sqrt(h * w / max_px)<br>        h_bar = <span class="hljs-built_in">max</span>(factor, math.floor(h / b / factor) * factor)<br>        w_bar = <span class="hljs-built_in">max</span>(factor, math.floor(w / b / factor) * factor)<br>    <span class="hljs-keyword">elif</span> h_bar * w_bar &lt; min_px:      <span class="hljs-comment"># 低于下限：按比例放</span><br>        b = math.sqrt(min_px / (h * w))<br>        h_bar = math.ceil(h * b / factor) * factor<br>        w_bar = math.ceil(w * b / factor) * factor<br>    <span class="hljs-keyword">return</span> h_bar, w_bar<br></code></pre></td></tr></table></figure>
+<p><code>factor=28 = patch_size(14) × merge(2)</code>，保证 patch 网格能被 2×2 整除。</p>
+<p><strong>示例</strong>：<code>example.png</code> 1024×1024 → <code>smart_resize</code> → <strong>1036×1036</strong>，<code>grid_h = grid_w = 74</code>。</p>
+<h3 id="3-2-归一化-patchify（按合并块排序）">3.2 归一化 + patchify（按合并块排序）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">x = pil_to_tensor(img.resize((W,H), BICUBIC)).<span class="hljs-built_in">float</span>() / <span class="hljs-number">255.0</span>   <span class="hljs-comment"># (3, 1036, 1036)</span><br>x = normalize(x, IMG_MEAN, IMG_STD)                             <span class="hljs-comment"># CLIP 均值/方差</span><br><span class="hljs-comment"># 切 14×14 patch，再按 2×2 合并块重排，时间维复制成 2</span><br>x = x.view(<span class="hljs-number">3</span>, <span class="hljs-number">37</span>, <span class="hljs-number">2</span>, <span class="hljs-number">14</span>, <span class="hljs-number">37</span>, <span class="hljs-number">2</span>, <span class="hljs-number">14</span>).permute(<span class="hljs-number">1</span>,<span class="hljs-number">4</span>,<span class="hljs-number">2</span>,<span class="hljs-number">5</span>,<span class="hljs-number">0</span>,<span class="hljs-number">3</span>,<span class="hljs-number">6</span>)      <span class="hljs-comment"># (37, 37, 2, 2, 3, 14, 14)</span><br>x = x.reshape(<span class="hljs-number">74</span>*<span class="hljs-number">74</span>, <span class="hljs-number">3</span>, <span class="hljs-number">14</span>, <span class="hljs-number">14</span>)                                  <span class="hljs-comment"># (5476, 3, 14, 14)</span><br>x = x.unsqueeze(<span class="hljs-number">2</span>).expand(-<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)                     <span class="hljs-comment"># (5476, 3, 2, 14, 14)</span><br>pixel_values = x.reshape(<span class="hljs-number">5476</span>, <span class="hljs-number">3</span>*<span class="hljs-number">2</span>*<span class="hljs-number">14</span>*<span class="hljs-number">14</span>)                        <span class="hljs-comment"># (5476, 1176)</span><br>grid_thw = torch.tensor([[<span class="hljs-number">1</span>, <span class="hljs-number">74</span>, <span class="hljs-number">74</span>]])                           <span class="hljs-comment"># (1, 3)</span><br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>每行是一个 patch 的展平输入：<code>3 通道 × 2 时间 × 14 × 14 = 1176</code>。<strong>行顺序是合并块顺序</strong><br>
+（先排 37×37 个 2×2 块，块内 4 个 patch 连续），这样后续 <code>Merger</code> 能直接 <code>view(-1, 5120)</code><br>
+把 4 个 patch 拼成一个向量。</p>
+</blockquote>
+<h3 id="3-3-chat-模板-image-pad-展开">3.3 chat 模板 + image_pad 展开</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs python">text = (<span class="hljs-string">&quot;&lt;|im_start|&gt;system\nYou are a helpful assistant.&lt;|im_end|&gt;\n&quot;</span><br>        <span class="hljs-string">&quot;&lt;|im_start|&gt;user\n&lt;|vision_start|&gt;&lt;|image_pad|&gt;&lt;|vision_end|&gt;&quot;</span><br>        <span class="hljs-string">&quot;Describe this image.&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\n&quot;</span>)<br>ids = tokenizer(text).input_ids                 <span class="hljs-comment"># 26 个 token（含 1 个 image_pad 占位）</span><br>n_img = (<span class="hljs-number">74</span>//<span class="hljs-number">2</span>) * (<span class="hljs-number">74</span>//<span class="hljs-number">2</span>)                        <span class="hljs-comment"># 1369（2×2 合并后视觉 token 数）</span><br><span class="hljs-comment"># 把单个 image_pad 展开成 1369 个 IMAGE_TOKEN_ID</span><br>new = []<br><span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> ids:<br>    new.extend([IMAGE_TOKEN_ID] * n_img <span class="hljs-keyword">if</span> t == IMAGE_TOKEN_ID <span class="hljs-keyword">else</span> [t])<br>input_ids = torch.tensor([new], dtype=torch.long)   <span class="hljs-comment"># (1, 1394) = 25 文本 + 1369 图像</span><br>mm_type  = (input_ids == IMAGE_TOKEN_ID).<span class="hljs-built_in">int</span>()   <span class="hljs-comment"># (1, 1394)：0=文本, 1=图像</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证结果</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>输出</th>
+<th>shape</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>input_ids</code></td>
+<td><code>(1, 1394)</code></td>
+<td>25 文本 + 1369 图像</td>
+</tr>
+<tr>
+<td><code>mm_type</code></td>
+<td><code>(1, 1394)</code></td>
+<td>0/1 标记</td>
+</tr>
+<tr>
+<td><code>grid_thw</code></td>
+<td><code>(1, 3)</code></td>
+<td><code>[[1, 74, 74]]</code></td>
+</tr>
+<tr>
+<td><code>pixel_values</code></td>
+<td><code>(5476, 1176)</code></td>
+<td>合并块顺序</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-部件二：视觉编码器">4. 部件二：视觉编码器</h2>
+<p>目标：<code>(5476, 1176)</code> 像素 → <code>(1369, 2048)</code> 视觉 embedding。</p>
+<h3 id="4-1-PatchEmbed：3D-Conv-一次性嵌入">4.1 PatchEmbed：3D Conv 一次性嵌入</h3>
+<p>用 <strong>3D 卷积</strong>（kernel = stride = <code>(2,14,14)</code>）把每个 patch 的 <code>3×2×14×14</code> 输入压成 1280 维向量，<br>
+时间维 <code>2</code> 被卷掉，等效于聚合&quot;复制出的两帧&quot;：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">PatchEmbed</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):<br>        k = (temporal_patch_size, patch_size, patch_size)   <span class="hljs-comment"># (2,14,14)</span><br>        <span class="hljs-variable language_">self</span>.proj = nn.Conv3d(<span class="hljs-number">3</span>, <span class="hljs-number">1280</span>, k, stride=k, bias=<span class="hljs-literal">False</span>)<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):                                   <span class="hljs-comment"># x: (5476, 1176)</span><br>        x = x.view(-<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">14</span>, <span class="hljs-number">14</span>)                        <span class="hljs-comment"># (5476, 3, 2, 14, 14)</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.proj(x).view(-<span class="hljs-number">1</span>, <span class="hljs-number">1280</span>)                  <span class="hljs-comment"># (5476, 1280)</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证</strong>：<code>patch_embed out = (5476, 1280)</code> ✓</p>
+<h3 id="4-2-二维-RoPE-频率表">4.2 二维 RoPE 频率表</h3>
+<p>视觉用 <strong>2D RoPE</strong>：每个 token 带一个 <code>(row, col)</code> 位置，同一 2×2 合并块内的 4 个 token 共享位置。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">vision_position_ids</span>(<span class="hljs-params">grid_thw, merge</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;(total_tokens, 2) -&gt; (row, col) position per token; tokens in the same</span><br><span class="hljs-string">    2x2 merge block share a position.&quot;&quot;&quot;</span><br>    dev = grid_thw.device<br>    out = []<br>    <span class="hljs-keyword">for</span> t, h, w <span class="hljs-keyword">in</span> grid_thw.tolist():                      <span class="hljs-comment"># t=1, h=74, w=74</span><br>        hp = torch.arange(h, device=dev).unsqueeze(<span class="hljs-number">1</span>).expand(-<span class="hljs-number">1</span>, w)            <span class="hljs-comment"># (74, 74) 行坐标</span><br>        hp = hp.reshape(h // merge, merge, w // merge, merge).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).flatten()  <span class="hljs-comment"># (5476,)</span><br>        wp = torch.arange(w, device=dev).unsqueeze(<span class="hljs-number">0</span>).expand(h, -<span class="hljs-number">1</span>)            <span class="hljs-comment"># (74, 74) 列坐标</span><br>        wp = wp.reshape(h // merge, merge, w // merge, merge).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>).flatten()  <span class="hljs-comment"># (5476,)</span><br>        out.append(torch.stack([hp, wp], -<span class="hljs-number">1</span>).repeat(t, <span class="hljs-number">1</span>))                    <span class="hljs-comment"># (5476, 2)</span><br>    <span class="hljs-keyword">return</span> torch.cat(out, <span class="hljs-number">0</span>)                                <span class="hljs-comment"># (5476, 2)</span><br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>关键：<code>reshape(37, 2, 37, 2).transpose(1, 2).flatten()</code> 让同一 2×2 合并块内的 4 个 token<br>
+拿到<strong>相同的</strong> (row, col) – 位置以合并块为粒度，与后续 4→1 合并对齐。</p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">VisionRotary</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, dim</span>):        <span class="hljs-comment"># dim = head_dim // 2 = 40</span><br>        <span class="hljs-built_in">super</span>().__init__()<br>        <span class="hljs-variable language_">self</span>.dim = dim<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, pos</span>):         <span class="hljs-comment"># pos: (L, 2)</span><br>        inv_freq = <span class="hljs-number">1.0</span> / (<span class="hljs-number">10000.0</span> ** (torch.arange(<span class="hljs-number">0</span>, <span class="hljs-variable language_">self</span>.dim, <span class="hljs-number">2</span>, device=pos.device, dtype=torch.<span class="hljs-built_in">float</span>) / <span class="hljs-variable language_">self</span>.dim))  <span class="hljs-comment"># (20,)</span><br>        <span class="hljs-keyword">return</span> (pos.unsqueeze(-<span class="hljs-number">1</span>) * inv_freq).flatten(<span class="hljs-number">1</span>)   <span class="hljs-comment"># (L, 2, 20) -&gt; (L, 40)</span><br><span class="hljs-comment"># 调用方后续: emb = torch.cat([rot, rot], -1)  -&gt; (L, 80)  对应 head_dim=80</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证</strong>：<code>pos = (5476, 2)</code>，<code>rotary emb = (5476, 80)</code>，<code>cos/sin = (5476, 80)</code> ✓</p>
+<h3 id="4-3-窗口注意力：一维打包-分段-SDPA">4.3 窗口注意力：一维打包 + 分段 SDPA</h3>
+<p>这是视觉编码器最巧妙的部分。Qwen2.5-VL 的 ViT 用<strong>窗口注意力</strong>（窗口 112 像素 = 4×4 合并块），<br>
+只在第 7/15/23/31 层做全局注意力。实现方式不是 mask，而是<strong>重排 token 顺序 + 分段 SDPA</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">window_index</span>(<span class="hljs-params">grid_thw, merge, window_size, patch_size</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;Reorder indices so tokens of each attention window are contiguous.&quot;&quot;&quot;</span><br>    dev = grid_thw.device<br>    idx, cu = [], [<span class="hljs-number">0</span>]<br>    wid = <span class="hljs-number">0</span><br>    mws = window_size // merge // patch_size            <span class="hljs-comment"># 112/2/14 = 4：每窗口 4×4 合并块</span><br>    <span class="hljs-keyword">for</span> t, h, w <span class="hljs-keyword">in</span> grid_thw.tolist():                   <span class="hljs-comment"># t=1, h=74, w=74</span><br>        lh, lw = h // merge, w // merge                 <span class="hljs-comment"># 37, 37  (合并块网格)</span><br>        index = torch.arange(t * lh * lw, device=dev).reshape(t, lh, lw)   <span class="hljs-comment"># (1, 37, 37) 块编号</span><br>        ph = mws - lh % mws                             <span class="hljs-comment"># 4 - 37%4 = 3  (行方向 pad)</span><br>        pw = mws - lw % mws                             <span class="hljs-comment"># 3</span><br>        nwh, nww = (lh + ph) // mws, (lw + pw) // mws   <span class="hljs-comment"># 10, 10  (窗口行列数)</span><br>        ip = F.pad(index, (<span class="hljs-number">0</span>, pw, <span class="hljs-number">0</span>, ph), <span class="hljs-string">&quot;constant&quot;</span>, -<span class="hljs-number">100</span>)                 <span class="hljs-comment"># (1, 40, 40) pad 到整除</span><br>        ip = ip.reshape(t, nwh, mws, nww, mws).permute(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">3</span>, <span class="hljs-number">2</span>, <span class="hljs-number">4</span>).reshape(t, nwh * nww, mws, mws)  <span class="hljs-comment"># (1, 100, 4, 4)</span><br>        seqlens = (ip != -<span class="hljs-number">100</span>).<span class="hljs-built_in">sum</span>([<span class="hljs-number">2</span>, <span class="hljs-number">3</span>]).reshape(-<span class="hljs-number">1</span>)  <span class="hljs-comment"># (100,) 每窗口有效合并块数</span><br>        inew = ip.reshape(-<span class="hljs-number">1</span>)<br>        inew = inew[inew != -<span class="hljs-number">100</span>]                       <span class="hljs-comment"># 剔除 pad，保留有效块编号</span><br>        idx.append(inew + wid)                          <span class="hljs-comment"># 加全局偏移</span><br>        cu.extend((seqlens.cumsum(<span class="hljs-number">0</span>) * SMU + cu[-<span class="hljs-number">1</span>]).tolist())   <span class="hljs-comment"># 每窗口 token 数 = 块数×4(SMU)</span><br>        wid += t * lh * lw<br>    <span class="hljs-keyword">return</span> torch.cat(idx, <span class="hljs-number">0</span>), torch.unique_consecutive(torch.tensor(cu, dtype=torch.int32, device=dev))<br>    <span class="hljs-comment"># win: (1369,)  重排后的合并块编号顺序</span><br>    <span class="hljs-comment"># cuw: (101,)   100 个窗口的累计 token 长度（满窗 4×4×4=64）</span><br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>注意 <code>win</code> 长度是 <strong>1369</strong>（合并块数），不是 5476——它重排的是合并块，每个块含 4 个 token。</p>
+</blockquote>
+<p><strong>验证</strong>：<code>win = (1369,)</code>，<code>cuw = (101,)</code>（100 窗口 + 起始 0），满窗 <code>seg_max = 64</code> ✓</p>
+<p>注意力本身：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">VisionAttn</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, cu, cos, sin</span>):          <span class="hljs-comment"># x: (L, 1280)</span><br>        q, k, v = <span class="hljs-variable language_">self</span>.qkv(x).reshape(L, <span class="hljs-number">3</span>, <span class="hljs-number">16</span>, <span class="hljs-number">80</span>).permute(<span class="hljs-number">1</span>,<span class="hljs-number">0</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>).unbind(<span class="hljs-number">0</span>)  <span class="hljs-comment"># 各 (L,16,80)</span><br>        q, k = <span class="hljs-variable language_">self</span>._rope(q, k, cos, sin)        <span class="hljs-comment"># 2D RoPE</span><br>        q, k, v = [t.transpose(<span class="hljs-number">0</span>,<span class="hljs-number">1</span>).unsqueeze(<span class="hljs-number">0</span>) <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> (q,k,v)]              <span class="hljs-comment"># 各 (1,16,L,80)</span><br>        lens = (cu[<span class="hljs-number">1</span>:] - cu[:-<span class="hljs-number">1</span>]).tolist()       <span class="hljs-comment"># 各段长度</span><br>        qs, ks, vs = torch.split(q, lens, <span class="hljs-number">2</span>), torch.split(k, lens, <span class="hljs-number">2</span>), torch.split(v, lens, <span class="hljs-number">2</span>)  <span class="hljs-comment"># 按段切开</span><br>        out = torch.cat([F.scaled_dot_product_attention(qi,ki,vi, scale=scale)<br>                         <span class="hljs-keyword">for</span> qi,ki,vi <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(qs,ks,vs)], dim=<span class="hljs-number">2</span>)  <span class="hljs-comment"># 每段独立注意力</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.proj(out.transpose(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>).reshape(L, <span class="hljs-number">1280</span>))<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>窗口层</strong>（如第 0 层）：<code>cu=cuw</code>，分 100 段，每段最多 64 token，段内互不注意力。</li>
+<li><strong>全局层</strong>（如第 7 层）：<code>cu=[0, 5476]</code>，1 段，全部 5476 token 互注意力。</li>
+</ul>
+<p><strong>验证</strong>：</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs coq">block0  WINDOW : q,k,v = (<span class="hljs-number">1</span>,<span class="hljs-number">16</span>,<span class="hljs-number">5476</span>,<span class="hljs-number">80</span>) ×<span class="hljs-number">3</span> | <span class="hljs-type">100</span> 段 | <span class="hljs-type">seg_max</span>=<span class="hljs-number">64</span><br>block7  FULLATT: q,k,v = (<span class="hljs-number">1</span>,<span class="hljs-number">16</span>,<span class="hljs-number">5476</span>,<span class="hljs-number">80</span>) ×<span class="hljs-number">3</span> | <span class="hljs-type">1</span> 段   | <span class="hljs-type">seg_max</span>=<span class="hljs-number">5476</span><br>每层输出 block out = (<span class="hljs-number">5476</span>, <span class="hljs-number">1280</span>) ✓<br></code></pre></td></tr></table></figure>
+<h3 id="4-4-视觉块与-Merger">4.4 视觉块与 Merger</h3>
+<p>每层是标准 pre-norm 残差：<code>x = x + attn(norm1(x))</code>，<code>x = x + mlp(norm2(x))</code>，MLP 为带 bias 的 SwiGLU。</p>
+<p>32 层后，<code>Merger</code> 把每个 2×2 合并块的 4 个 patch token（<code>4×1280=5120</code>）拼成一个 2048 维向量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Merger</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-variable language_">self</span>.hs = <span class="hljs-number">1280</span> * <span class="hljs-number">4</span>              <span class="hljs-comment"># 5120</span><br>        <span class="hljs-variable language_">self</span>.ln_q = RMSNorm(<span class="hljs-number">1280</span>)<br>        <span class="hljs-variable language_">self</span>.mlp = nn.Sequential(Linear(<span class="hljs-number">5120</span>,<span class="hljs-number">5120</span>), GELU(), Linear(<span class="hljs-number">5120</span>, <span class="hljs-number">2048</span>))<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):               <span class="hljs-comment"># x: (5476, 1280)</span><br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.mlp(<span class="hljs-variable language_">self</span>.ln_q(x).view(-<span class="hljs-number">1</span>, <span class="hljs-number">5120</span>))   <span class="hljs-comment"># (1369, 2048)</span><br></code></pre></td></tr></table></figure>
+<p><code>Merger</code> 之后用 <code>argsort(win)</code> 的逆重排恢复原始合并块顺序。</p>
+<p><strong>验证</strong>：<code>merger out = (1369, 2048)</code> ✓ — 1369 个视觉 token，维度对齐 LLM。</p>
+<hr>
+<h2 id="5-部件三：多模态位置编码-M-RoPE">5. 部件三：多模态位置编码 M-RoPE</h2>
+<p>普通 RoPE 只有 1D 位置。Qwen2.5-VL 用 <strong>M-RoPE</strong>：把 head_dim=128 拆成<br>
+<strong>时间(32) + 高(48) + 宽(48)</strong> 三段，每段用对应维度的位置独立旋转，让模型感知图像的 2D+T 结构。</p>
+<h3 id="5-1-构造-3D-位置：rope-index">5.1 构造 3D 位置：rope_index</h3>
+<p>对单条（batch=1，无 padding）序列，按 <code>mm_type</code> 的连续 run 分组：</p>
+<ul>
+<li><strong>文本段 (mod=0)</strong>：1D 位置 <code>arange(n)</code>，复制到 3 个轴。</li>
+<li><strong>图像段 (mod=1)</strong>：取对应 <code>grid_thw</code>，生成 3D 位置
+<ul>
+<li>时间 <code>pt</code>：全 0（静态图，time_interval=1）</li>
+<li>高度 <code>ph</code>：<code>arange(37)</code> repeat</li>
+<li>宽度 <code>pw</code>：<code>arange(37)</code> repeat</li>
+<li>该段位置跨度 = <code>max(h,w)//MERGE = 37</code></li>
+</ul>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">rope_index</span>(<span class="hljs-params">input_ids, mm_type, grid_thw</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;3D mrope position ids for a single (batch=1, no padding) sequence.&quot;&quot;&quot;</span><br>    dev = input_ids.device<br>    ids = input_ids[<span class="hljs-number">0</span>]<br>    L = ids.shape[<span class="hljs-number">0</span>]                                   <span class="hljs-comment"># 1394</span><br>    mt = mm_type[<span class="hljs-number">0</span>].tolist()<br>    groups = []<br>    <span class="hljs-keyword">for</span> k, g <span class="hljs-keyword">in</span> itertools.groupby(<span class="hljs-built_in">enumerate</span>(mt), <span class="hljs-keyword">lambda</span> x: x[<span class="hljs-number">1</span>]):<br>        g = <span class="hljs-built_in">list</span>(g)<br>        groups.append((k, g[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>], g[-<span class="hljs-number">1</span>][<span class="hljs-number">0</span>] + <span class="hljs-number">1</span>))     <span class="hljs-comment"># (mod, start, end) 每段连续 run</span><br>    cur = <span class="hljs-number">0</span><br>    parts = []<br>    gi = <span class="hljs-built_in">iter</span>(grid_thw.tolist())<br>    <span class="hljs-keyword">for</span> mod, s, e <span class="hljs-keyword">in</span> groups:<br>        <span class="hljs-keyword">if</span> mod == <span class="hljs-number">0</span>:                                   <span class="hljs-comment"># 文本段 -&gt; 1D 位置复制到 3 轴</span><br>            n = e - s<br>            parts.append(torch.arange(n, device=dev).view(<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>).expand(<span class="hljs-number">3</span>, -<span class="hljs-number">1</span>) + cur)  <span class="hljs-comment"># (3, n)</span><br>            cur += n<br>        <span class="hljs-keyword">else</span>:                                          <span class="hljs-comment"># 图像段 -&gt; 3D 位置 (time_interval=1)</span><br>            t, h, w = <span class="hljs-built_in">next</span>(gi)                          <span class="hljs-comment"># 1, 74, 74</span><br>            lt, lh, lw = t, h // MERGE, w // MERGE      <span class="hljs-comment"># 1, 37, 37</span><br>            pt = torch.arange(lt, device=dev).repeat_interleave(lh * lw) + cur          <span class="hljs-comment"># (1369,) 时间</span><br>            ph = (torch.arange(lh, device=dev) + cur).repeat_interleave(lw).repeat(lt)   <span class="hljs-comment"># (1369,) 高</span><br>            pw = (torch.arange(lw, device=dev) + cur).repeat(lh * lt)                    <span class="hljs-comment"># (1369,) 宽</span><br>            parts.append(torch.stack([pt, ph, pw], <span class="hljs-number">0</span>))  <span class="hljs-comment"># (3, 1369)</span><br>            cur += <span class="hljs-built_in">max</span>(h, w) // MERGE                   <span class="hljs-comment"># 跨度 37（不是 1369！）</span><br>    positions = torch.cat(parts, <span class="hljs-number">1</span>)                     <span class="hljs-comment"># (3, L=1394)</span><br>    pos = torch.zeros(<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, L, dtype=torch.long, device=dev)<br>    pos[:, <span class="hljs-number">0</span>] = positions<br>    <span class="hljs-keyword">return</span> pos, (positions.<span class="hljs-built_in">max</span>() + <span class="hljs-number">1</span> - L).item()        <span class="hljs-comment"># pos (3,1,1394), delta</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证</strong>：<code>pos = (3, 1, 1394)</code>，<code>delta = -1332</code> ✓</p>
+<blockquote>
+<p><strong>delta 为负的原因</strong>：图像 1369 个 token 的 3D 位置只跨 37（高/宽各 37），而它在序列里占<br>
+1369 个位置。可精确推导：</p>
+<ul>
+<li>文本 token 共 25 个（图前 n1 + 图后 n2，n1+n2=25），图像位置从 n1 起算，跨度 37。</li>
+<li><code>positions.max() = n1 + 37 + n2 - 1 = 25 + 36 = 61</code>，而 <code>L = 1394</code>。</li>
+<li><code>delta = 61 + 1 - 1394 = -1332</code>。</li>
+</ul>
+<p>解码时新 token 位置 = <code>cur + delta</code>，等价于从 <code>positions.max()+1 = 62</code> 继续递增——<br>
+见 §8 第 5 步实测 <code>npos = 62</code>，完美吻合。这保证生成 token 的 M-RoPE 位置紧接 prompt 末尾。</p>
+</blockquote>
+<h3 id="5-2-旋转：rope-cos-sin">5.2 旋转：rope_cos_sin</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">rope_cos_sin</span>(<span class="hljs-params">self, pos</span>):  <span class="hljs-comment"># pos: (3, b, s) long</span><br>    inv_freq = <span class="hljs-number">1.0</span> / (T.rope_theta ** (torch.arange(<span class="hljs-number">0</span>, HEAD_DIM, <span class="hljs-number">2</span>, device=pos.device, dtype=torch.<span class="hljs-built_in">float</span>) / HEAD_DIM))  <span class="hljs-comment"># (64,)</span><br>    freqs = pos.<span class="hljs-built_in">float</span>().unsqueeze(-<span class="hljs-number">1</span>) * inv_freq       <span class="hljs-comment"># (3, b, s, 64)</span><br>    emb = torch.cat([freqs, freqs], -<span class="hljs-number">1</span>)                <span class="hljs-comment"># (3, b, s, 128)</span><br>    cos, sin = emb.cos(), emb.sin()                    <span class="hljs-comment"># 各 (3, b, s, 128)</span><br>    cs, ss = cos.split(<span class="hljs-variable language_">self</span>.sec, -<span class="hljs-number">1</span>), sin.split(<span class="hljs-variable language_">self</span>.sec, -<span class="hljs-number">1</span>)   <span class="hljs-comment"># sec=[32,48,48] 拆 T/H/W 三段</span><br>    cos = torch.cat([cs[i][i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>)], -<span class="hljs-number">1</span>).unsqueeze(<span class="hljs-number">1</span>)  <span class="hljs-comment"># 第 i 段取第 i 轴 -&gt; (b, 1, s, 128)</span><br>    sin = torch.cat([ss[i][i] <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>)], -<span class="hljs-number">1</span>).unsqueeze(<span class="hljs-number">1</span>)<br>    dt = <span class="hljs-variable language_">self</span>.lm_head.weight.dtype<br>    <span class="hljs-keyword">return</span> cos.to(dt), sin.to(dt)                      <span class="hljs-comment"># (b, 1, s, 128)</span><br></code></pre></td></tr></table></figure>
+<p>即：head_dim 前 32 维用时间位置旋转，中 48 维用高度位置，后 48 维用宽度位置。</p>
+<p><strong>验证</strong>：<code>mrope cos/sin = (1, 1, 1394, 128)</code> ✓</p>
+<h3 id="5-3-M-RoPE-坐标举例（以示例序列实测）">5.3 M-RoPE 坐标举例（以示例序列实测）</h3>
+<p>光看公式不直观，下面用示例序列（<code>example.png</code> + <code>&quot;Describe this image.&quot;</code>）<strong>实测</strong>每个 token<br>
+的 <code>(t, h, w)</code> 三轴位置。该序列共 1394 个 token，结构为：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">idx</span>  <span class="hljs-number">0</span> .. <span class="hljs-number">14</span>        : <span class="hljs-number">15</span> 个文本 token  (system + user 前缀，到 &lt;|vision_start|&gt;)<br><span class="hljs-attribute">idx</span> <span class="hljs-number">15</span> .. <span class="hljs-number">1383</span>      : <span class="hljs-number">1369</span> 个图像 token (<span class="hljs-number">37</span>×<span class="hljs-number">37</span> 网格)<br><span class="hljs-attribute">idx</span> <span class="hljs-number">1384</span> .. <span class="hljs-number">1393</span>    : <span class="hljs-number">10</span> 个文本 token  (&lt;|vision_end|&gt;Describe this image.&lt;|im_end|&gt;...assistant)<br></code></pre></td></tr></table></figure>
+<blockquote>
+<p>记 <code>n1 = 15</code>（图像前的文本数）。图像段的 <code>cur = 15</code>，所以图像的 2D 网格位置整体偏移 15，<br>
+即 <code>h, w ∈ [15, 51]</code>（37 个值）。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>序列 idx</th>
+<th>token 类型</th>
+<th>(t, h, w)</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>文本（首个）</td>
+<td><strong>(0, 0, 0)</strong></td>
+<td>三轴相等</td>
+</tr>
+<tr>
+<td>14</td>
+<td>文本（图前最后）</td>
+<td><strong>(14, 14, 14)</strong></td>
+<td>三轴相等</td>
+</tr>
+<tr>
+<td>15</td>
+<td>图像 [0,0] 左上</td>
+<td><strong>(15, 15, 15)</strong></td>
+<td>t 恒定；h=行0、w=列0</td>
+</tr>
+<tr>
+<td>16</td>
+<td>图像 [0,1]</td>
+<td><strong>(15, 15, 16)</strong></td>
+<td>同行，w+1</td>
+</tr>
+<tr>
+<td>51</td>
+<td>图像 [0,36] 行末</td>
+<td><strong>(15, 15, 51)</strong></td>
+<td>行 0 最后一个，w=15+36</td>
+</tr>
+<tr>
+<td>52</td>
+<td>图像 [1,0] 换行</td>
+<td><strong>(15, 16, 15)</strong></td>
+<td>新行，h+1、w 重置</td>
+</tr>
+<tr>
+<td>53</td>
+<td>图像 [1,1]</td>
+<td><strong>(15, 16, 16)</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>89</td>
+<td>图像 [2,0]</td>
+<td><strong>(15, 17, 15)</strong></td>
+<td>第 2 行起点</td>
+</tr>
+<tr>
+<td>1383</td>
+<td>图像 [36,36] 右下</td>
+<td><strong>(15, 51, 51)</strong></td>
+<td>网格最后一个</td>
+</tr>
+<tr>
+<td>1384</td>
+<td>文本（图后首个）</td>
+<td><strong>(52, 52, 52)</strong></td>
+<td>三轴相等；cur=15+37=52</td>
+</tr>
+<tr>
+<td>1393</td>
+<td>文本（末尾 assistant）</td>
+<td><strong>(61, 61, 61)</strong></td>
+<td>三轴相等</td>
+</tr>
+</tbody>
+</table>
+<p>读法：</p>
+<ul>
+<li><strong>文本 token</strong>：<code>t = h = w</code>，三轴完全相同–就是把 1D 位置复制到 3 个轴，退化为普通 RoPE。</li>
+<li><strong>图像 token</strong>：
+<ul>
+<li><code>t</code> 恒为 15（静态图，时间维不增长）；</li>
+<li><code>h = 15 + 行号</code>，<strong>每 37 个 token 换一行</strong>（行内 h 不变）；</li>
+<li><code>w = 15 + 列号</code>，<strong>每行内从 15 递增到 51</strong>（行末重置回 15）。</li>
+</ul>
+</li>
+</ul>
+<p>把图像 1369 个 token 的 <code>(h, w)</code> 画出来，就是一张 37×37 的 2D 网格：</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs tap">        w=15 <span class="hljs-number"> 16 </span><span class="hljs-number"> 17 </span>... 51<br>h=15  [ <span class="hljs-number"> 15 </span> <span class="hljs-number"> 16 </span> <span class="hljs-number"> 17 </span> ...<span class="hljs-number"> 51 </span>]   &lt;- idx 15..51   (第<span class="hljs-number"> 0 </span>行)<br>h=16  [ <span class="hljs-number"> 15 </span> <span class="hljs-number"> 16 </span> <span class="hljs-number"> 17 </span> ...<span class="hljs-number"> 51 </span>]   &lt;- idx 52..88   (第<span class="hljs-number"> 1 </span>行)<br>h=17  [ <span class="hljs-number"> 15 </span> <span class="hljs-number"> 16 </span> <span class="hljs-number"> 17 </span> ...<span class="hljs-number"> 51 </span>]   &lt;- idx 89..125  (第<span class="hljs-number"> 2 </span>行)<br> ...<br>h=51  [ <span class="hljs-number"> 15 </span> <span class="hljs-number"> 16 </span> <span class="hljs-number"> 17 </span> ...<span class="hljs-number"> 51 </span>]   &lt;- idx 1347..1383(第<span class="hljs-number"> 36 </span>行)<br></code></pre></td></tr></table></figure>
+<p>这样模型对图像有了<strong>真正的二维空间感知</strong>：空间相邻的 patch（如 [0,0] 与 [0,1]）在 h/w<br>
+位置上也相邻，旋转后的内积更大、注意力更强；而 [0,36] 与 [1,0] 虽然序列上相邻（idx 51、52），<br>
+但 h/w 位置差异大，注意力反而弱–这正是 M-RoPE 相比 1D RoPE 的核心收益。</p>
+<p><strong>回到 delta</strong>：图像 1369 个 token 在序列里占了 1369 个位置，但其 <code>(h, w)</code> 只跨 37（15→51），<br>
+<code>positions.max()</code> 由末尾文本 token 决定 = 61（见 idx 1393），远小于 <code>L = 1394</code>，故<br>
+<code>delta = 62 − 1394 = −1332</code>。解码时新 token 用 <code>cur + delta</code> 从 62 继续递增，与 idx 1393 的 61<br>
+严格衔接。</p>
+<hr>
+<h2 id="6-部件四：语言模型">6. 部件四：语言模型</h2>
+<p>标准 pre-norm 解码器，36 层，每层 = GQA 注意力 + SwiGLU MLP。</p>
+<h3 id="6-1-GQA-注意力（含-KV-cache）">6.1 GQA 注意力（含 KV cache）</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">LLMAttn</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, cos, sin, cache</span>):           <span class="hljs-comment"># x: (b, L, 2048)</span><br>        q = <span class="hljs-variable language_">self</span>.q_proj(x).view(b, L, <span class="hljs-number">16</span>, <span class="hljs-number">128</span>).transpose(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>)   <span class="hljs-comment"># (b, 16, L, 128)</span><br>        k = <span class="hljs-variable language_">self</span>.k_proj(x).view(b, L, <span class="hljs-number">2</span>, <span class="hljs-number">128</span>).transpose(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>)    <span class="hljs-comment"># (b, 2, L, 128)  GQA</span><br>        v = <span class="hljs-variable language_">self</span>.v_proj(x).view(b, L, <span class="hljs-number">2</span>, <span class="hljs-number">128</span>).transpose(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>)<br>        q, k = apply_mrope(q, k, cos, sin)           <span class="hljs-comment"># M-RoPE 旋转</span><br>        <span class="hljs-keyword">if</span> cache <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:<br>            k = torch.cat([cache[<span class="hljs-number">0</span>], k], <span class="hljs-number">2</span>)          <span class="hljs-comment"># 拼历史 K</span><br>            v = torch.cat([cache[<span class="hljs-number">1</span>], v], <span class="hljs-number">2</span>)          <span class="hljs-comment"># 拼历史 V</span><br>        k = repeat_kv(k, <span class="hljs-number">8</span>)                          <span class="hljs-comment"># 2 头复制成 16 头</span><br>        v = repeat_kv(v, <span class="hljs-number">8</span>)<br>        a = F.scaled_dot_product_attention(q, k, v, is_causal=(L&gt;<span class="hljs-number">1</span>), scale=<span class="hljs-number">128</span>**-<span class="hljs-number">0.5</span>)<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.o_proj(a.transpose(<span class="hljs-number">1</span>,<span class="hljs-number">2</span>).reshape(b, L, <span class="hljs-number">2048</span>)), (k_raw, v_raw)<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>prefill</strong>（<code>L=1394&gt;1</code>）：<code>is_causal=True</code>，整条序列一次算完，建立 KV cache。</li>
+<li><strong>解码</strong>（<code>L=1</code>）：<code>is_causal=False</code>，新 token 的 k/v 拼到 cache 末尾，只算 1 个 query 对全部历史。</li>
+</ul>
+<p><strong>验证</strong>（layer 0，prefill）：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">q</span>          = (<span class="hljs-number">1</span>, <span class="hljs-number">16</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">128</span>)   # <span class="hljs-number">16</span> query 头<br><span class="hljs-attribute">k</span>, v       = (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">128</span>)    # <span class="hljs-number">2</span> KV 头<br><span class="hljs-attribute">repeat_kv</span>  = (<span class="hljs-number">1</span>, <span class="hljs-number">16</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">128</span>)   # 复制成 <span class="hljs-number">16</span> 头与 q 对齐<br><span class="hljs-attribute">prefill</span> logits = (<span class="hljs-number">1</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">151936</span>)<br><span class="hljs-attribute">cache</span> 每层 = (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">128</span>) ×<span class="hljs-number">2</span> (k,v)，共 <span class="hljs-number">36</span> 层 ✓<br></code></pre></td></tr></table></figure>
+<h3 id="6-2-SwiGLU-MLP-RMSNorm">6.2 SwiGLU MLP + RMSNorm</h3>
+<p>无 bias SwiGLU：<code>down(silu(gate(x)) * up(x))</code>，中间维度 11008。每层两个 RMSNorm（input / post-attention）。</p>
+<hr>
+<h2 id="7-部件五：视觉-语言融合与生成">7. 部件五：视觉-语言融合与生成</h2>
+<h3 id="7-1-融合：masked-scatter-注入">7.1 融合：masked_scatter 注入</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">ie = visual(pixel_values, grid_thw)              <span class="hljs-comment"># (1369, 2048) 视觉 embedding</span><br>embeds = embed_tokens(input_ids)                 <span class="hljs-comment"># (1, 1394, 2048)</span><br>mask = (input_ids == IMAGE_TOKEN_ID).unsqueeze(-<span class="hljs-number">1</span>)   <span class="hljs-comment"># (1, 1394, 1)，1369 处 True</span><br>embeds = embeds.masked_scatter(mask, ie.reshape(-<span class="hljs-number">1</span>)) <span class="hljs-comment"># 把视觉向量塞进 image_pad 位置</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证</strong>：<code>mask = (1, 1394, 1)</code>，<code>num_true = 1369</code>，注入后 <code>embeds = (1, 1394, 2048)</code> ✓</p>
+<h3 id="7-2-生成循环">7.2 生成循环</h3>
+<ol>
+<li><strong>视觉编码</strong> → <code>ie (1369, 2048)</code></li>
+<li><strong>注入</strong> → <code>embeds (1, 1394, 2048)</code></li>
+<li><strong>位置</strong> → <code>pos (3, 1, 1394)</code> + <code>delta</code></li>
+<li><strong>Prefill</strong>：<code>forward(embeds, pos)</code> 一次跑完整条序列，建 KV cache，取末位 logits</li>
+<li><strong>解码循环</strong>：
+<ul>
+<li>对已出现 token 做<strong>重复惩罚</strong>：负 logit ×1.05、正 Logit ÷1.05</li>
+<li><code>argmax</code> 取下一个 token，命中 EOS (151645/151643) 则停</li>
+<li>新 token embedding <code>(1,1,2048)</code> + 新位置 <code>npos (3,1,1)</code> 调 <code>forward(..., cache)</code> 增量解码</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">npos = torch.full((<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), cur + delta, dtype=torch.long, device=dev)  <span class="hljs-comment"># cur 从 L=1394 起，+delta 回到逻辑位置空间</span><br>nem  = embed_tokens(torch.tensor([[nxt]], device=dev))                    <span class="hljs-comment"># (1, 1, 2048)</span><br>logits, cache = forward(nem, npos, cache)                                 <span class="hljs-comment"># 用 cache 增量</span><br></code></pre></td></tr></table></figure>
+<p><strong>验证</strong>（第一步解码）：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">next</span> token id = <span class="hljs-number">785</span>  -&gt;  <span class="hljs-string">&quot;The&quot;</span><br><span class="hljs-attribute">nem</span>        = (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2048</span>)<br><span class="hljs-attribute">npos</span>       = (<span class="hljs-number">3</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>)，值 = <span class="hljs-number">62</span>       # = <span class="hljs-number">1394</span> + (-<span class="hljs-number">1332</span>)，与 positions.max()+<span class="hljs-number">1</span> 吻合<br><span class="hljs-attribute">decode</span> logits = (<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">151936</span>)<br><span class="hljs-attribute">cache</span> after +<span class="hljs-number">1</span> = (<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1395</span>, <span class="hljs-number">128</span>)    # 序列长度 +<span class="hljs-number">1</span> ✓<br></code></pre></td></tr></table></figure>
+<h3 id="7-3-权重加载">7.3 权重加载</h3>
+<p>直接读 safetensors shard，<code>strict=False</code> 加载，并 tying 输出权重：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">sd = &#123;&#125;<br><span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-built_in">sorted</span>(glob(path + <span class="hljs-string">&quot;/model-*.safetensors&quot;</span>)):<br>    sd.update(load_file(f))<br>model.load_state_dict(sd, strict=<span class="hljs-literal">False</span>)<br>model.lm_head.weight = model.model.embed_tokens.weight   <span class="hljs-comment"># tied embeddings</span><br></code></pre></td></tr></table></figure>
+<h3 id="7-4-端到端实测输出">7.4 端到端实测输出</h3>
+<p>对 <code>example.png</code> 实际运行（<code>max_new=60</code>，bfloat16，CUDA）生成：</p>
+<blockquote>
+<p><em>“The image shows a person with long, dark hair wearing a white top. They are holding their hands<br>
+near their face, with fingers gently touching the sides of their cheeks. The background appears to<br>
+be an outdoor setting with greenery and some fallen leaves on the ground.”</em></p>
+</blockquote>
+<hr>
+<h2 id="8-完整前向传播-Shape-追踪（已验证）">8. 完整前向传播 Shape 追踪（已验证）</h2>
+<p><strong>输入</strong>：<code>example.png</code> (1024×1024) + <code>&quot;Describe this image.&quot;</code>。以下 shape 全部经实际运行验证。</p>
+<h3 id="8-1-预处理">8.1 预处理</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>张量</th>
+<th>shape</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>原图</td>
+<td><code>img</code></td>
+<td>(W, H)</td>
+<td>(1024, 1024)</td>
+</tr>
+<tr>
+<td>smart_resize</td>
+<td><code>H, W</code></td>
+<td>—</td>
+<td>1036, 1036</td>
+</tr>
+<tr>
+<td>grid</td>
+<td><code>grid_h, grid_w</code></td>
+<td>—</td>
+<td>74, 74</td>
+</tr>
+<tr>
+<td>patchify</td>
+<td><code>pixel_values</code></td>
+<td><strong>(5476, 1176)</strong></td>
+<td>✓</td>
+</tr>
+<tr>
+<td>grid_thw</td>
+<td></td>
+<td><strong>(1, 3)</strong></td>
+<td><code>[[1,74,74]]</code></td>
+</tr>
+<tr>
+<td>tokenize</td>
+<td><code>ids</code></td>
+<td>(26,)</td>
+<td>含 1 image_pad</td>
+</tr>
+<tr>
+<td>展开</td>
+<td><code>input_ids</code></td>
+<td><strong>(1, 1394)</strong></td>
+<td>25 文本 + 1369 图像</td>
+</tr>
+<tr>
+<td>类型标记</td>
+<td><code>mm_type</code></td>
+<td><strong>(1, 1394)</strong></td>
+<td>0/1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-2-视觉编码">8.2 视觉编码</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>张量</th>
+<th>shape</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2D 位置</td>
+<td><code>pos</code></td>
+<td>(5476, 2)</td>
+<td>(row,col)</td>
+</tr>
+<tr>
+<td>全局 cu</td>
+<td><code>cu</code></td>
+<td>(2,)</td>
+<td><code>[0, 5476]</code></td>
+</tr>
+<tr>
+<td>窗口重排</td>
+<td><code>win</code></td>
+<td><strong>(1369,)</strong></td>
+<td>合并块粒度</td>
+</tr>
+<tr>
+<td>窗口 cu</td>
+<td><code>cuw</code></td>
+<td>(101,)</td>
+<td>100 窗口</td>
+</tr>
+<tr>
+<td>PatchEmbed</td>
+<td><code>x</code></td>
+<td><strong>(5476, 1280)</strong></td>
+<td>Conv3d</td>
+</tr>
+<tr>
+<td>RoPE emb</td>
+<td><code>cos/sin</code></td>
+<td>(5476, 80)</td>
+<td>head_dim=80</td>
+</tr>
+<tr>
+<td>窗口层 q,k,v</td>
+<td></td>
+<td>(1,16,5476,80) ×3</td>
+<td>100 段，seg_max=64</td>
+</tr>
+<tr>
+<td>全局层 q,k,v</td>
+<td></td>
+<td>(1,16,5476,80) ×3</td>
+<td>1 段，seg_max=5476</td>
+</tr>
+<tr>
+<td>每层输出</td>
+<td></td>
+<td>(5476, 1280)</td>
+<td></td>
+</tr>
+<tr>
+<td>Merger</td>
+<td><code>ie</code></td>
+<td><strong>(1369, 2048)</strong></td>
+<td>4→1 合并</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-3-融合与位置">8.3 融合与位置</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>张量</th>
+<th>shape</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>视觉 embedding</td>
+<td><code>ie</code></td>
+<td>(1369, 2048)</td>
+<td></td>
+</tr>
+<tr>
+<td>token embedding</td>
+<td><code>embeds</code></td>
+<td>(1, 1394, 2048)</td>
+<td></td>
+</tr>
+<tr>
+<td>注入 mask</td>
+<td><code>mask</code></td>
+<td>(1, 1394, 1)</td>
+<td>1369 True</td>
+</tr>
+<tr>
+<td>注入后</td>
+<td><code>embeds</code></td>
+<td><strong>(1, 1394, 2048)</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>M-RoPE 位置</td>
+<td><code>pos</code></td>
+<td><strong>(3, 1, 1394)</strong></td>
+<td>delta = <strong>-1332</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-4-LLM-Prefill">8.4 LLM Prefill</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>张量</th>
+<th>shape</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M-RoPE cos/sin</td>
+<td></td>
+<td>(1, 1, 1394, 128)</td>
+<td>T32+H48+W48</td>
+</tr>
+<tr>
+<td>query</td>
+<td><code>q</code></td>
+<td>(1, 16, 1394, 128)</td>
+<td>16 头</td>
+</tr>
+<tr>
+<td>key/value</td>
+<td><code>k, v</code></td>
+<td>(1, 2, 1394, 128)</td>
+<td>2 KV 头</td>
+</tr>
+<tr>
+<td>repeat_kv 后</td>
+<td><code>k, v</code></td>
+<td>(1, 16, 1394, 128)</td>
+<td>对齐 q</td>
+</tr>
+<tr>
+<td>输出 logits</td>
+<td></td>
+<td><strong>(1, 1394, 151936)</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>KV cache（每层）</td>
+<td></td>
+<td>(1, 2, 1394, 128) ×2</td>
+<td>共 36 层</td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-5-解码（每生成-1-token）">8.5 解码（每生成 1 token）</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>张量</th>
+<th>shape</th>
+<th>实测值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>取末位 logits</td>
+<td><code>lg</code></td>
+<td>(1, 151936)</td>
+<td>argmax → 785 “The”</td>
+</tr>
+<tr>
+<td>新 token embedding</td>
+<td><code>nem</code></td>
+<td>(1, 1, 2048)</td>
+<td></td>
+</tr>
+<tr>
+<td>新位置</td>
+<td><code>npos</code></td>
+<td>(3, 1, 1)</td>
+<td>值 = <strong>62</strong></td>
+</tr>
+<tr>
+<td>拼接 cache</td>
+<td><code>k, v</code></td>
+<td>(1, 2, 1395, 128)</td>
+<td>长度 +1</td>
+</tr>
+<tr>
+<td>输出 logits</td>
+<td></td>
+<td><strong>(1, 1, 151936)</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="8-6-端到端-Shape-流转图">8.6 端到端 Shape 流转图</h3>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs erlang">图像 (<span class="hljs-number">1024</span>,<span class="hljs-number">1024</span>,<span class="hljs-number">3</span>)<br>   │ smart_resize + normalize + patchify<br>   ▼<br><span class="hljs-function"><span class="hljs-title">pixel_values</span> <span class="hljs-params">(<span class="hljs-number">5476</span>, <span class="hljs-number">1176</span>)</span>  ──<span class="hljs-title">grid_thw</span> <span class="hljs-params">(<span class="hljs-number">1</span>,<span class="hljs-number">3</span>)</span>──┐</span><br><span class="hljs-function">   │ P<span class="hljs-title">atchEmbed</span> <span class="hljs-params">(Conv3d)</span>                       │</span><br><span class="hljs-function">   ▼                                           │</span><br><span class="hljs-function"><span class="hljs-params">(<span class="hljs-number">5476</span>, <span class="hljs-number">1280</span>)</span>                                   │</span><br><span class="hljs-function">   │ 32×[窗口/全局 A<span class="hljs-title">ttn</span> + S<span class="hljs-title">wiGLU</span>]              │</span><br><span class="hljs-function">   ▼                                           │</span><br><span class="hljs-function"><span class="hljs-params">(<span class="hljs-number">5476</span>, <span class="hljs-number">1280</span>)</span>                                   │</span><br><span class="hljs-function">   │ M<span class="hljs-title">erger</span> <span class="hljs-params">(<span class="hljs-number">4</span>→<span class="hljs-number">1</span>)</span>                              │</span><br><span class="hljs-function">   ▼</span><br><span class="hljs-function">视觉 <span class="hljs-title">embedding</span> <span class="hljs-params">(<span class="hljs-number">1369</span>, <span class="hljs-number">2048</span>)</span></span><br><span class="hljs-function">   │ <span class="hljs-title">masked_scatter</span> 进 <span class="hljs-title">input_ids</span> <span class="hljs-title">embedding</span></span><br><span class="hljs-function">   ▼</span><br><span class="hljs-function"><span class="hljs-title">embeds</span> <span class="hljs-params">(<span class="hljs-number">1</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">2048</span>)</span>  ←── <span class="hljs-title">pos</span> <span class="hljs-params">(<span class="hljs-number">3</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1394</span>)</span>  M-R<span class="hljs-title">oPE</span>  [<span class="hljs-title">delta</span>=-1332]</span><br><span class="hljs-function">   │ 36×[GQA A<span class="hljs-title">ttn</span> + S<span class="hljs-title">wiGLU</span>]  <span class="hljs-params">(建 KV cache)</span></span><br><span class="hljs-function">   ▼</span><br><span class="hljs-function"><span class="hljs-title">logits</span> <span class="hljs-params">(<span class="hljs-number">1</span>, <span class="hljs-number">1394</span>, <span class="hljs-number">151936</span>)</span> ─取末位─▶ <span class="hljs-title">argmax</span> ──▶ &quot;T<span class="hljs-title">he</span>&quot;<span class="hljs-params">(<span class="hljs-number">785</span>)</span></span><br><span class="hljs-function">                                        │</span><br><span class="hljs-function">                   ┌─── 循环 ──────────┘</span><br><span class="hljs-function">                   ▼</span><br><span class="hljs-function">          <span class="hljs-title">nem</span> <span class="hljs-params">(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">2048</span>)</span> + <span class="hljs-title">npos</span> <span class="hljs-params">(<span class="hljs-number">3</span>,<span class="hljs-number">1</span>,<span class="hljs-number">1</span>)</span>=62 + <span class="hljs-title">cache</span></span><br><span class="hljs-function">                   │ 36 层（每层 <span class="hljs-title">k</span>,<span class="hljs-title">v</span> 长度 +1 → 1395）</span><br><span class="hljs-function">                   ▼</span><br><span class="hljs-function">          <span class="hljs-title">logits</span> <span class="hljs-params">(<span class="hljs-number">1</span>,<span class="hljs-number">1</span>,<span class="hljs-number">151936</span>)</span> ─▶ <span class="hljs-title">argmax</span> ─▶ ...  直到 EOS</span><br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="9-关键设计要点">9. 关键设计要点</h2>
+<h3 id="9-1-视觉-token-4×-压缩">9.1 视觉 token 4× 压缩</h3>
+<p><code>patch_size=14</code> 把 1036×1036 切成 74×74=5476 patch；<code>spatial_merge_size=2</code> 让 <code>Merger</code> 把每个<br>
+2×2 块的 4 个 patch 合成 1 个 token，<code>5476/4 = 1369</code>。这是压缩视觉序列长度、降低 LLM 端注意力<br>
+开销的关键。</p>
+<h3 id="9-2-窗口注意力的一维打包实现">9.2 窗口注意力的一维打包实现</h3>
+<p>不用 mask，而是 <code>window_index</code> 把 token 按 4×4 合并块窗口重排（<code>win</code> 长度 1369），让同窗口<br>
+token 连续；<code>cuw</code> 给出每窗口累计长度；<code>VisionAttn</code> 用 <code>torch.split</code> 按 <code>cuw</code> 切段，对每段独立<br>
+调 SDPA 再 <code>cat</code>。第 7/15/23/31 层换全局 <code>cu</code>（整图一段）传递长距离信息。实测窗口层 100 段、<br>
+seg_max=64；全局层 1 段、seg_max=5476。</p>
+<h3 id="9-3-M-RoPE-与普通-RoPE-的区别">9.3 M-RoPE 与普通 RoPE 的区别</h3>
+<p>普通 RoPE 只有 1D 位置；M-RoPE 把 head_dim 拆成 T/H/W 三段（32+48+48），分别用三维位置旋转。<br>
+文本 token 三轴位置相同（1D 复制）；图像 token 三轴分别是时间/高/宽——模型因此能感知图像<br>
+二维空间结构。</p>
+<h3 id="9-4-delta-补偿：3D-位置与序列长度不一致">9.4 delta 补偿：3D 位置与序列长度不一致</h3>
+<p>图像 1369 个 token 的 3D 位置只跨 37，导致 <code>positions.max()=61</code> 远小于 <code>L=1394</code>，<code>delta=-1332</code>。<br>
+解码时 <code>npos = cur + delta</code> 把&quot;绝对 token 计数&quot;映射回&quot;逻辑位置空间&quot;，实测第一步 <code>npos=62</code>，<br>
+正好是 <code>positions.max()+1</code>，保证生成 token 的 M-RoPE 位置紧接 prompt 末尾。</p>
+<h3 id="9-5-GQA-KV-cache">9.5 GQA + KV cache</h3>
+<p>每层缓存 <code>k, v</code> 各 <code>(1, 2, L, 128)</code>（2 个 KV 头）。解码时新 token 的 k/v 拼到 cache 末尾，<br>
+<code>repeat_kv</code> 把 2 头复制成 16 头与 q 对齐。Prefill 用 <code>is_causal=True</code>，单步解码 <code>is_causal=False</code>。<br>
+实测 cache 从 <code>(1,2,1394,128)</code> 增长到 <code>(1,2,1395,128)</code>。</p>
+<h3 id="9-6-重复惩罚">9.6 重复惩罚</h3>
+<p>greedy 解码下对所有已出现 token 的 logit：负值 ×1.05、正值 ÷1.05，降低重复概率。无 beam search /<br>
+sampling / top-k，适合确定性单答。</p>
+<h3 id="9-7-权重-tying">9.7 权重 tying</h3>
+<p><code>lm_head</code> 不单独存权重，直接共享 <code>embed_tokens.weight</code>，节省 <code>151936×2048</code> 参数。</p>
+<h3 id="9-8-局限">9.8 局限</h3>
+<ul>
+<li>仅单图单轮、batch=1</li>
+<li>仅 greedy + 重复惩罚</li>
+<li>仅 bfloat16 / CUDA（8GB 显卡需 <code>PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True</code> 减少碎片）</li>
+<li>不使用 FlashAttention / fused kernel，为可读性牺牲吞吐</li>
+</ul>
+<hr>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/VLM/" class="category-chain-item">VLM</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%A4%9A%E6%A8%A1%E6%80%81/" class="print-no-link">#多模态</a>
+      
+        <a href="/tags/VLM/" class="print-no-link">#VLM</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从零构建Qwen2.5VL的推理</div>
+      <div>https://huan-yin.github.io/2026/07/23/从零构建Qwen2-5VL的推理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>李相越</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月23日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/07/16/awesome-reference-image-generation/" title="Awesome Reference Image Generation">
+                        <span class="hidden-mobile">Awesome Reference Image Generation</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+  
+<script src="/js/custom.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
