@@ -27,7 +27,7 @@
 <meta property="og:description" content="教育经历 本科：中国矿业大学 (211) ，计算机科学与技术专业 (计算机科学与技术学院)， 2020.09 - 2024.06  荣誉奖项: 2020-2021学年校一等奖学金，2021-2022及2022-2023学年校二等奖学金。  研究生：苏州大学 (211) ，软件工程专业 (计算机科学与技术学院)， 2024.09 - 至今  荣誉奖项: 2024-2025学年国家奖学金，2023-2">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-03-12T06:53:28.000Z">
-<meta property="article:modified_time" content="2026-08-02T15:49:33.602Z">
+<meta property="article:modified_time" content="2026-08-16T15:30:33.260Z">
 <meta property="article:author" content="李相越">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -371,7 +371,14 @@
 <h2 id="专业技能">专业技能</h2>
 <ul>
 <li><strong>研究方向:</strong> 研究生方向为缺陷样本的可控生成与分割。熟悉计算机视觉生成和分割的相关内容。对于图像生成，掌握扩散模型 (Diffusion Models) 的基础理论，熟悉其发展进程及 DiT、Flow Matching 等前沿理论与技术。深入研究并熟悉 Stable Diffusion、Flux、Qwen Image、Z Image 等开源图像生成模型的技术细节与代码实现（详细信息可见 <a target="_blank" rel="noopener" href="https://github.com/huan-yin/Awesome-Image-Generation-Model">Awesome Image Generation Model</a> ）；掌握相关开源模型的微调及可控生成技术，能够实现给定参考图像生成语义相近的图像（详细信息可见 <a target="_blank" rel="noopener" href="https://github.com/huan-yin/Awesome-Reference-Image-Generation">Awesome Reference Image Generation</a> ）。</li>
+<li><strong>参考生成demo:</strong> 可以进行物体插入和服装替换: <a target="_blank" rel="noopener" href="https://www.modelscope.cn/studios/HuanJue/Easy-Insert">https://www.modelscope.cn/studios/HuanJue/Easy-Insert</a> 。</li>
 <li><strong>算法与编程能力:</strong> 具备优秀的逻辑思维与扎实的算法基础。获得 CCF-CSP 软件能力认证 <strong>285分</strong>，PAT 甲级计算机程序设计考试 <strong>84分</strong>；获第十四届蓝桥杯全国软件和信息技术专业人才大赛（江苏赛区）C/C++ 程序设计大学 A组 二等奖。</li>
+</ul>
+<h2 id="实习经历">实习经历</h2>
+<h3 id="中国电信人工智能研究院-Tele-AI">中国电信人工智能研究院 (Tele-AI)</h3>
+<ul>
+<li><strong>主要实习内容:</strong><br>
+研究如何给目前的SOTA生成模型添加控制条件以进行真实工业缺陷参考生成，针对Stable Diffusion XL、Flux.1-redux + Flux.1-Fill dev、Flux.2-klein三种模型，用不同方法框架实现工业缺陷的生成，在真实缺陷业务场景中进行数据的预处理、批量生成，同时利用Qwen 3.6 27B进行生成图像的质量评估、过滤。</li>
 </ul>
 <h2 id="研究生主要工作">研究生主要工作</h2>
 <h3 id="项目一：基于掩码对齐的缺陷图像生成与分割">项目一：基于掩码对齐的缺陷图像生成与分割</h3>
@@ -393,6 +400,17 @@
 <li><strong>痛点解决:</strong> 针对传统生成方法仅能针对特定对象生成已知异常，无法为投产前的新产品预测未见缺陷的问题，提出基于历史大数据的融合检索与生成方案。</li>
 <li><strong>跨模态精准检索:</strong> 利用大语言模型 (LLM) 和经对比学习微调的异常感知 CLIP 模型进行跨模态检索，从庞大的历史图库中高效提取目标产品潜在的参考异常图像。</li>
 <li><strong>条件引导合成:</strong> 生成模型以检索到的异常图像作为先验条件，引导扩散模型在正常物体上高质量地合成带有相应缺陷的预测图像。</li>
+</ul>
+</li>
+</ul>
+<h3 id="项目三：参考缺陷引导的图像填充生成">项目三：参考缺陷引导的图像填充生成</h3>
+<ul>
+<li><strong>Demo 在线体验:</strong> <a target="_blank" rel="noopener" href="https://www.modelscope.cn/studios/HuanJue/Reference_Anomaly_Generation">HuanJue/Reference_Anomaly_Generation – ModelScope Studio</a></li>
+<li><strong>主要研究内容:</strong>
+<ul>
+<li><strong>痛点解决:</strong> 针对现有参考式生成方法（如IP-Adapter）普遍采用CLIP图像编码器，导致对训练集中未见过的缺陷图像特征提取不准、泛化能力弱的问题，提出基于同源架构的编码方案。</li>
+<li><strong>核心架构:</strong> 参考缺陷图像编码采用 ReferenceNet 架构，将编码器替换为与生成主干去噪网络同源的架构（Stable Diffusion 中为 U-Net）。以参考缺陷图像作为输入，通过与 Denoising UNet 完全同步的下采样和上采样模块，提取出多尺度、多层级的特征图。</li>
+<li><strong>泛化能力提升:</strong> 利用 concat self attention 的形式进行参考特征的注入，确保参考特征与生成网络在同一特征空间，有效提升了对未见缺陷类型的迁移生成能力，实现了在背景图像指定区域生成与参考图像高度相似的缺陷。</li>
 </ul>
 </li>
 </ul>
