@@ -1,0 +1,1143 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/banner.png">
+  <link rel="icon" href="/img/banner.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="李相越">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="从零实现Transformer做列表翻转，提供 encoder-decoder 架构以及 decoder_only 架构实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从零实现Transformer做列表翻转">
+<meta property="og:url" content="https://huan-yin.github.io/2026/04/11/%E4%BB%8E%E9%9B%B6%E5%AE%9E%E7%8E%B0Transformer%E5%81%9A%E5%88%97%E8%A1%A8%E7%BF%BB%E8%BD%AC/index.html">
+<meta property="og:site_name" content="李相越的博客">
+<meta property="og:description" content="从零实现Transformer做列表翻转，提供 encoder-decoder 架构以及 decoder_only 架构实现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://huan-yin.github.io/img/%E4%BB%8E%E9%9B%B6%E5%AE%9E%E7%8E%B0Transformer%E5%81%9A%E5%88%97%E8%A1%A8%E7%BF%BB%E8%BD%AC.png">
+<meta property="article:published_time" content="2026-04-11T08:32:31.000Z">
+<meta property="article:modified_time" content="2026-08-18T14:20:07.025Z">
+<meta property="article:author" content="李相越">
+<meta property="article:tag" content="MultiHeadAttention">
+<meta property="article:tag" content="Transformer">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://huan-yin.github.io/img/%E4%BB%8E%E9%9B%B6%E5%AE%9E%E7%8E%B0Transformer%E5%81%9A%E5%88%97%E8%A1%A8%E7%BF%BB%E8%BD%AC.png">
+  
+  
+    <meta name="referrer" content="no-referrer-when-downgrade">
+  
+  
+  <title>从零实现Transformer做列表翻转 - 李相越的博客</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/KaTeX/0.16.2/katex.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"huan-yin.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":false,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.1"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/about/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-user-fill"></i>
+                  <span>关于</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-search-btn">
+            <a href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-search"></i>
+                <span>搜索</span>
+              </div>
+            </a>
+          </div>
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/banner.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="从零实现Transformer做列表翻转"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-04-11 16:32" pubdate>
+          2026年4月11日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          30k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          249 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="busuanzi_container_page_pv" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="busuanzi_value_page_pv"></span> 次
+        </span>
+        
+
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">从零实现Transformer做列表翻转</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="从零实现-transformer-做列表翻转">从零实现 Transformer 做列表翻转</h1>
+<blockquote>
+<p>本文档从零讲解如何用纯 PyTorch 手写一个 Transformer，让它学会&quot;把一串数字倒过来&quot;。列表翻转是入门 Seq2Seq 的经典 toy task：任务规则极其简单（反转），但模型必须<strong>自己学会</strong>&quot;第 1 个输出对应最后一个输入&quot;这种远距离的、依赖位置信息的映射关系，因此非常适合用来验证你手写的 Transformer 是否真的 work。</p>
+</blockquote>
+<hr>
+<h2 id="目录">目录</h2>
+<ol>
+<li><a href="#1-%E4%BB%BB%E5%8A%A1%E5%AE%9A%E4%B9%89%E4%B8%8E%E6%95%B4%E4%BD%93%E6%80%9D%E8%B7%AF">任务定义与整体思路</a></li>
+<li><a href="#2-%E5%85%A8%E5%B1%80%E9%85%8D%E7%BD%AE%E4%B8%8E%E8%AF%8D%E8%A1%A8%E8%AE%BE%E8%AE%A1">全局配置与词表设计</a></li>
+<li><a href="#3-%E6%95%B0%E6%8D%AE%E9%9B%86%E6%9E%84%E9%80%A0">数据集构造</a></li>
+<li><a href="#4-maskpadding-mask-%E4%B8%8E-causal-mask">Mask：Padding Mask 与 Causal Mask</a></li>
+<li><a href="#5-%E6%A8%A1%E5%9E%8B%E7%BB%84%E4%BB%B6">模型组件</a>
+<ul>
+<li>5.1 缩放点积注意力 Scaled Dot-Product Attention</li>
+<li>5.2 多头注意力 Multi-Head Attention</li>
+<li>5.3 位置编码 Positional Encoding</li>
+<li>5.4 前馈网络 Feed Forward</li>
+<li>5.5 Encoder Layer / Decoder Layer</li>
+<li>5.6 组装完整的 Encoder-Decoder Transformer</li>
+<li>5.7 Decoder-Only（GPT 风格）变体</li>
+</ul>
+</li>
+<li><a href="#6-%E8%AE%AD%E7%BB%83%E6%B5%81%E7%A8%8B">训练流程</a></li>
+<li><a href="#7-%E6%8E%A8%E7%90%86%E4%B8%8E%E8%B4%AA%E5%BF%83%E8%A7%A3%E7%A0%81">推理与贪心解码</a></li>
+<li><a href="#8-%E8%B6%85%E5%8F%82%E6%95%B0%E4%B8%8E%E8%AE%AD%E7%BB%83%E6%95%88%E6%9E%9C">超参数与训练效果</a></li>
+<li><a href="#9-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E6%80%9D%E8%80%83">常见问题与思考</a></li>
+</ol>
+<hr>
+<h2 id="1-任务定义与整体思路">1. 任务定义与整体思路</h2>
+<p><strong>任务</strong>：输入一个数字列表，输出它的反转。</p>
+<figure class="highlight accesslog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs accesslog">输入:  <span class="hljs-string">[3, 5, 7, 2]</span><br>输出:  <span class="hljs-string">[2, 7, 5, 3]</span><br></code></pre></td></tr></table></figure>
+<p>这本质上是一个序列到序列（Seq2Seq）问题，和机器翻译的结构一模一样：把&quot;源序列&quot;编码，再自回归地生成&quot;目标序列&quot;。因此我们可以原封不动地套用 2017 年论文 <em>Attention Is All You Need</em> 中的 Transformer 架构。</p>
+<p>本文实现两种架构，改一行配置即可切换：</p>
+<table>
+<thead>
+<tr>
+<th>架构</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>encoder_decoder</code></td>
+<td>原始 Transformer：Encoder 编码源序列，Decoder 通过 cross-attention 读取源序列，自回归生成目标</td>
+</tr>
+<tr>
+<td><code>decoder_only</code></td>
+<td>GPT 风格：把 <code>&lt;BOS&gt; src &lt;EOS&gt; tgt &lt;EOS&gt;</code> 拼成一条序列，用 causal mask 做 next-token 预测</td>
+</tr>
+</tbody>
+</table>
+<p><strong>架构一：Encoder-Decoder 的数据流</strong></p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs scss">源序列 (src)<br>   │<br>   ▼<br>Embedding + 位置编码<br>   │<br>   ▼<br>┌──────────────┐     memory<br>│   Encoder    │ ────────────────┐<br>└──────────────┘                 ▼<br>                          ┌──────────────┐     ┌───────────┐<br> 目标序列前缀 (&lt;BOS&gt; ...) │   Decoder    │ ──▶ │  Linear   │ ──▶ 下一个 token 的概率分布<br>                    ────▶ │ (自回归生成)  │     │(generator)│<br>                          └──────────────┘     └───────────┘<br></code></pre></td></tr></table></figure>
+<p>Encoder 把源序列编码成一组上下文表示 <code>memory</code>；Decoder 每一步把&quot;已生成的目标前缀&quot;和 <code>memory</code> 一起输入，预测下一个 token。</p>
+<p><strong>架构二：Decoder-Only 的数据流</strong></p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs lasso">&lt;BOS&gt; src<span class="hljs-params">...</span> &lt;EOS&gt; tgt 前缀<span class="hljs-params">...</span><br>   │<br>   ▼<br>Embedding + 位置编码<br>   │<br>   ▼<br>┌──────────────────────────┐     ┌───────────┐<br>│  N × DecoderOnlyLayer    │ ──▶ │  Linear   │ ──▶ 每个位置的下一个 token 概率分布<br>│  (masked <span class="hljs-built_in">self</span><span class="hljs-params">-attention</span>) │     │(generator)│<br>└──────────────────────────┘     └───────────┘<br></code></pre></td></tr></table></figure>
+<p>Decoder-Only 没有 Encoder，也不分源/目标：把&quot;prompt（<code>&lt;BOS&gt; src &lt;EOS&gt;</code>）+ 已生成的目标前缀&quot;拼成<strong>一条序列</strong>直接输入，模型在 causal mask 约束下对<strong>每个位置</strong>预测下一个 token。源序列的信息全靠 self-attention 在序列内部传递——prompt 部分的 token 充当&quot;上下文&quot;，生成位置的 token 通过注意力回看 prompt。</p>
+<hr>
+<h2 id="2-全局配置与词表设计">2. 全局配置与词表设计</h2>
+<p>把所有超参数集中在一个配置模块里，方便调整：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># =========================</span><br><span class="hljs-comment"># 全局配置：特殊 token 与超参数</span><br><span class="hljs-comment"># =========================</span><br><br><span class="hljs-comment"># 特殊 token 定义</span><br>PAD_IDX = <span class="hljs-number">0</span><br>BOS_IDX = <span class="hljs-number">1</span><br>EOS_IDX = <span class="hljs-number">2</span><br><br><span class="hljs-comment"># 0: PAD</span><br><span class="hljs-comment"># 1: BOS</span><br><span class="hljs-comment"># 2: EOS</span><br><span class="hljs-comment"># 3 ~ 12: 数字 0 ~ 9</span><br>VOCAB_SIZE = <span class="hljs-number">13</span><br><br><span class="hljs-comment"># 数据集配置</span><br>TRAIN_NUM_SAMPLES = <span class="hljs-number">200000</span><br>TEST_NUM_SAMPLES = <span class="hljs-number">200</span><br>MIN_LEN = <span class="hljs-number">3</span><br>MAX_LEN = <span class="hljs-number">12</span><br>TRAIN_SEED = <span class="hljs-number">0</span><br>TEST_SEED = <span class="hljs-number">42</span>  <span class="hljs-comment"># 与训练集不同的种子，保证测试样本不来自训练集</span><br><br><span class="hljs-comment"># 模型配置</span><br><span class="hljs-comment"># 架构选择: &quot;encoder_decoder&quot; 或 &quot;decoder_only&quot;</span><br>ARCHITECTURE = <span class="hljs-string">&quot;decoder_only&quot;</span><br>D_MODEL = <span class="hljs-number">128</span><br>NUM_HEADS = <span class="hljs-number">4</span><br>NUM_ENCODER_LAYERS = <span class="hljs-number">2</span><br>NUM_DECODER_LAYERS = <span class="hljs-number">4</span><br>D_FF = <span class="hljs-number">512</span><br>DROPOUT = <span class="hljs-number">0.1</span><br>MODEL_MAX_LEN = <span class="hljs-number">64</span><br><br><span class="hljs-comment"># 训练配置</span><br>BATCH_SIZE = <span class="hljs-number">64</span><br>EPOCHS = <span class="hljs-number">9</span><br>LR = <span class="hljs-number">3e-4</span><br>GRAD_CLIP = <span class="hljs-number">1.0</span><br><br><span class="hljs-comment"># checkpoint 保存路径</span><br>CHECKPOINT_PATH = <span class="hljs-string">&quot;checkpoint.pt&quot;</span><br></code></pre></td></tr></table></figure>
+<p>设计要点：</p>
+<ul>
+<li><strong><code>PAD/BOS/EOS</code> 占用 <code>0/1/2</code></strong>，把 <code>3~12</code> 留给数字 <code>0~9</code>（即 <code>token_id = digit + 3</code>）。这样词表是<strong>固定</strong>的，不需要根据数据动态构建，适合 toy task。</li>
+<li>后续 loss 计算用 <code>ignore_index=PAD_IDX</code> 把 padding 位置的损失忽略掉。</li>
+<li>训练/测试用<strong>不同的随机种子</strong>生成数据，保证测试集不会出现在训练集中，评估的才是真正的&quot;泛化能力&quot;。</li>
+</ul>
+<hr>
+<h2 id="3-数据集构造">3. 数据集构造</h2>
+<h3 id="3-1-Encoder-Decoder-格式的样本">3.1 Encoder-Decoder 格式的样本</h3>
+<p>为每个样本生成三个张量：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> random<br><br><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> Dataset<br><span class="hljs-keyword">from</span> torch.nn.utils.rnn <span class="hljs-keyword">import</span> pad_sequence<br><br>PAD_IDX = <span class="hljs-number">0</span><br>BOS_IDX = <span class="hljs-number">1</span><br>EOS_IDX = <span class="hljs-number">2</span><br><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">ReverseDataset</span>(<span class="hljs-title class_ inherited__">Dataset</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    输入: 一串数字</span><br><span class="hljs-string">    目标: 将这串数字反转</span><br><span class="hljs-string"></span><br><span class="hljs-string">    例如:</span><br><span class="hljs-string">    src:       3 5 7</span><br><span class="hljs-string">    tgt_input: &lt;BOS&gt; 7 5 3</span><br><span class="hljs-string">    tgt_label: 7 5 3 &lt;EOS&gt;</span><br><span class="hljs-string"></span><br><span class="hljs-string">    通过传入不同的 seed，可以生成互不相同的训练集 / 测试集。</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, num_samples=<span class="hljs-number">2000</span>, min_len=<span class="hljs-number">3</span>, max_len=<span class="hljs-number">12</span>, seed=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-built_in">super</span>(ReverseDataset, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-comment"># 使用独立的 Random 实例，避免污染全局随机状态，</span><br>        <span class="hljs-comment"># 同时保证训练集和测试集可以用不同种子生成不同样本</span><br>        rng = random.Random(seed)<br><br>        <span class="hljs-variable language_">self</span>.samples = []<br><br>        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_samples):<br>            length = rng.randint(min_len, max_len)<br><br>            <span class="hljs-comment"># 生成数字 0 ~ 9</span><br>            digits = torch.randint(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>, (length,), dtype=torch.long)<br><br>            <span class="hljs-comment"># 映射到词表索引 3 ~ 12</span><br>            src = digits + <span class="hljs-number">3</span><br><br>            <span class="hljs-comment"># 目标序列是反转后的 src</span><br>            tgt = src.flip(<span class="hljs-number">0</span>)<br><br>            tgt_in = torch.cat(<br>                [<br>                    torch.tensor([BOS_IDX], dtype=torch.long),<br>                    tgt,<br>                ]<br>            )<br><br>            tgt_out = torch.cat(<br>                [<br>                    tgt,<br>                    torch.tensor([EOS_IDX], dtype=torch.long),<br>                ]<br>            )<br><br>            <span class="hljs-variable language_">self</span>.samples.append((src, tgt_in, tgt_out))<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.samples)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__getitem__</span>(<span class="hljs-params">self, idx</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.samples[idx]<br></code></pre></td></tr></table></figure>
+<p>以 <code>src = [3, 5, 7]</code>（token id 为 <code>[6, 8, 10]</code>）为例：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">src</span>:       <span class="hljs-number">6</span>  <span class="hljs-number">8</span>  <span class="hljs-number">10</span><br><span class="hljs-attribute">tgt_in</span>:    <span class="hljs-number">1</span>  <span class="hljs-number">10</span> <span class="hljs-number">8</span>  <span class="hljs-number">6</span>      # &lt;BOS&gt; 开头，整体右移<br><span class="hljs-attribute">tgt_out</span>:   <span class="hljs-number">10</span> <span class="hljs-number">8</span>  <span class="hljs-number">6</span>  <span class="hljs-number">2</span>      # 末尾补 &lt;EOS&gt;<br></code></pre></td></tr></table></figure>
+<p><strong>为什么要右移（shift right）？</strong> 因为 Decoder 是自回归的：在位置 <code>t</code>，模型只能看到 <code>&lt;BOS&gt;</code> 和前 <code>t-1</code> 个已生成的 token，然后预测第 <code>t</code> 个 token。<code>tgt_in[i]</code> 的预测目标就是 <code>tgt_out[i]</code>，两者恰好错开一位，这就是标准的 <strong>teacher forcing</strong> 训练方式。</p>
+<h3 id="3-2-Decoder-Only-格式的样本">3.2 Decoder-Only 格式的样本</h3>
+<p>GPT 风格的模型只吃一条序列，所以把 prompt 和目标拼接起来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">DecoderOnlyReverseDataset</span>(<span class="hljs-title class_ inherited__">Dataset</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    与 ReverseDataset 相同的任务，但整理成 decoder-only（GPT 风格）的单序列格式：</span><br><span class="hljs-string"></span><br><span class="hljs-string">    full:      &lt;BOS&gt; src... &lt;EOS&gt; tgt... &lt;EOS&gt;</span><br><span class="hljs-string">    input_ids: full[:-1]</span><br><span class="hljs-string">    labels:    full[1:]，其中 prompt 部分（src token 和分隔 &lt;EOS&gt; 的预测位）</span><br><span class="hljs-string">               置为 PAD_IDX，训练时忽略这部分 loss，只学习生成 tgt。</span><br><span class="hljs-string"></span><br><span class="hljs-string">    __getitem__ 返回 (src, input_ids, labels)，src 供评估时构造 prompt 使用。</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, num_samples=<span class="hljs-number">2000</span>, min_len=<span class="hljs-number">3</span>, max_len=<span class="hljs-number">12</span>, seed=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-built_in">super</span>(DecoderOnlyReverseDataset, <span class="hljs-variable language_">self</span>).__init__()<br><br>        rng = random.Random(seed)<br><br>        <span class="hljs-variable language_">self</span>.samples = []<br><br>        <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_samples):<br>            length = rng.randint(min_len, max_len)<br><br>            digits = torch.randint(<span class="hljs-number">0</span>, <span class="hljs-number">10</span>, (length,), dtype=torch.long)<br><br>            <span class="hljs-comment"># 映射到词表索引 3 ~ 12</span><br>            src = digits + <span class="hljs-number">3</span><br><br>            <span class="hljs-comment"># 目标序列是反转后的 src</span><br>            tgt = src.flip(<span class="hljs-number">0</span>)<br><br>            full = torch.cat(<br>                [<br>                    torch.tensor([BOS_IDX], dtype=torch.long),<br>                    src,<br>                    torch.tensor([EOS_IDX], dtype=torch.long),<br>                    tgt,<br>                    torch.tensor([EOS_IDX], dtype=torch.long),<br>                ]<br>            )<br><br>            input_ids = full[:-<span class="hljs-number">1</span>]<br>            labels = full[<span class="hljs-number">1</span>:].clone()<br><br>            <span class="hljs-comment"># labels[i] 是 input_ids[i] 的下一个 token。</span><br>            <span class="hljs-comment"># prompt 为 &lt;BOS&gt; src... &lt;EOS&gt;（共 length + 2 个 token），</span><br>            <span class="hljs-comment"># 其续写位置（src token 与分隔 &lt;EOS&gt; 的预测位）不需要学习，置 PAD 忽略</span><br>            prompt_len = length + <span class="hljs-number">2</span><br>            labels[: prompt_len - <span class="hljs-number">1</span>] = PAD_IDX<br><br>            <span class="hljs-variable language_">self</span>.samples.append((src, input_ids, labels))<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-built_in">len</span>(<span class="hljs-variable language_">self</span>.samples)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__getitem__</span>(<span class="hljs-params">self, idx</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.samples[idx]<br></code></pre></td></tr></table></figure>
+<p>关键技巧是 <strong>label masking</strong>：prompt 部分的 label 置为 <code>PAD_IDX</code>，让 loss 只计算在目标部分。模型只学习&quot;看到 <code>&lt;BOS&gt; src &lt;EOS&gt;</code> 之后该如何续写反转序列&quot;，这正是 GPT 类模型做指令任务的标准做法。</p>
+<h3 id="3-3-Collate：batch-内对齐长度">3.3 Collate：batch 内对齐长度</h3>
+<p>一个 batch 里的序列长度不同，用 <code>pad_sequence</code> 右侧补 <code>PAD</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">collate_fn_decoder_only</span>(<span class="hljs-params">batch</span>):<br>    src_list = [item[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br>    input_ids_list = [item[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br>    labels_list = [item[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br><br>    src = pad_sequence(src_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br>    input_ids = pad_sequence(input_ids_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br>    <span class="hljs-comment"># labels 用 PAD 补齐，正好被 loss 的 ignore_index 忽略</span><br>    labels = pad_sequence(labels_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br><br>    <span class="hljs-keyword">return</span> src, input_ids, labels<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">collate_fn</span>(<span class="hljs-params">batch</span>):<br>    src_list = [item[<span class="hljs-number">0</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br>    tgt_in_list = [item[<span class="hljs-number">1</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br>    tgt_out_list = [item[<span class="hljs-number">2</span>] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> batch]<br><br>    src = pad_sequence(src_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br>    tgt_in = pad_sequence(tgt_in_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br>    tgt_out = pad_sequence(tgt_out_list, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br><br>    <span class="hljs-keyword">return</span> src, tgt_in, tgt_out<br></code></pre></td></tr></table></figure>
+<p>补齐产生的 <code>PAD</code> 之后会被两处机制处理掉：<strong>注意力中的 padding mask</strong>（不看它）和 <strong>loss 的 <code>ignore_index</code></strong>（不惩罚它）。</p>
+<hr>
+<h2 id="4-Mask：Padding-Mask-与-Causal-Mask">4. Mask：Padding Mask 与 Causal Mask</h2>
+<p>Mask 是 Transformer 里最容易出错的部分，这里约定：<strong><code>1</code> 表示可见，<code>0</code> 表示屏蔽</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><br>PAD_IDX = <span class="hljs-number">0</span><br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">create_padding_mask</span>(<span class="hljs-params">seq, pad_idx=PAD_IDX</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    seq: (batch_size, seq_len)</span><br><span class="hljs-string">    return: (batch_size, 1, 1, seq_len)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    1 表示真实 token</span><br><span class="hljs-string">    0 表示 padding token</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    mask = (seq != pad_idx).<span class="hljs-built_in">float</span>()<br>    <span class="hljs-keyword">return</span> mask.unsqueeze(<span class="hljs-number">1</span>).unsqueeze(<span class="hljs-number">2</span>)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">create_causal_mask</span>(<span class="hljs-params">size, device</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    return: (1, 1, size, size)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    下三角为 1，表示可见</span><br><span class="hljs-string">    上三角为 0，表示未来位置不可见</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    mask = torch.tril(torch.ones(size, size, device=device))<br>    <span class="hljs-keyword">return</span> mask.unsqueeze(<span class="hljs-number">0</span>).unsqueeze(<span class="hljs-number">0</span>)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">create_decoder_self_mask</span>(<span class="hljs-params">tgt, pad_idx=PAD_IDX</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    tgt: (batch_size, tgt_len)</span><br><span class="hljs-string">    return: (batch_size, 1, tgt_len, tgt_len)</span><br><span class="hljs-string"></span><br><span class="hljs-string">    Decoder self-attention mask:</span><br><span class="hljs-string">    causal mask + padding mask</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    pad_mask = create_padding_mask(tgt, pad_idx)               <span class="hljs-comment"># (B, 1, 1, L)</span><br>    causal_mask = create_causal_mask(tgt.size(<span class="hljs-number">1</span>), tgt.device)  <span class="hljs-comment"># (1, 1, L, L)</span><br><br>    mask = causal_mask * pad_mask  <span class="hljs-comment"># (B, 1, L, L)</span><br>    <span class="hljs-keyword">return</span> mask<br></code></pre></td></tr></table></figure>
+<p>下面用具体例子逐个展示每种 mask 长什么样。约定一个 batch（<code>B = 2</code>），其中第二条序列更短、右侧补了 <code>PAD</code>：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">序列 <span class="hljs-number">1</span>:  <span class="hljs-selector-attr">[BOS, 8, 5, 10]</span>        长度 <span class="hljs-number">4</span>，无 <span class="hljs-attribute">padding</span><br>序列 <span class="hljs-number">2</span>:  <span class="hljs-selector-attr">[BOS, 7, PAD, PAD]</span>     实际长度 <span class="hljs-number">2</span>，补齐到 <span class="hljs-number">4</span><br></code></pre></td></tr></table></figure>
+<p><strong>Padding Mask 的例子</strong></p>
+<p><code>create_padding_mask</code> 对上面的 batch 生成形状 <code>(2, 1, 1, 4)</code> 的 mask：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">序列</span> <span class="hljs-attr">1:</span>  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>]     <span class="hljs-comment"># 全是真实 token，全部可见</span><br><span class="hljs-string">序列</span> <span class="hljs-attr">2:</span>  [<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>]     <span class="hljs-comment"># 后两个 PAD 位置被屏蔽</span><br></code></pre></td></tr></table></figure>
+<p>这个 mask 可以广播到注意力分数 <code>(B, H, L_q, L_k)</code> 上，作用在<strong>最后一维（key 维度）</strong>：任何 query 位置都不允许注意 padding token。以序列 2 为例，无论哪个位置做 query，它算出的注意力权重只会分布在前 2 个真实 token 上，2 个 <code>PAD</code> 位拿到的权重恒为 0。</p>
+<p><strong>Causal Mask（因果掩码）的例子</strong></p>
+<p><code>create_causal_mask(4)</code> 生成一个 4×4 的下三角矩阵（形状 <code>(1, 1, 4, 4)</code>，与 batch 无关）：</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">         key: <span class="hljs-number"> 0 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 2 </span> 3<br>query<span class="hljs-number"> 0 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 位置 0 只能看自己</span><br>query<span class="hljs-number"> 1 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 位置 1 能看 0~1</span><br>query<span class="hljs-number"> 2 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 位置 2 能看 0~2</span><br>query<span class="hljs-number"> 3 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span> ]    <span class="hljs-comment"># 位置 3 能看全部</span><br></code></pre></td></tr></table></figure>
+<p>位置 <code>i</code> 只能看到 <code>0..i</code>，<strong>看不到未来</strong>。这是自回归生成的核心约束：预测第 <code>t</code> 个 token 时不许偷看第 <code>t</code> 个及之后的答案。比如生成反转序列时，模型在预测第 2 个输出 token 的位置，注意力里绝不能出现第 2、3 个位置的真实 token，否则训练就成了抄答案。</p>
+<p><strong>Decoder 自注意力组合 Mask 的例子</strong></p>
+<p><code>create_decoder_self_mask</code> 把上面两个 mask <strong>逐元素相乘</strong>。对序列 2（<code>[BOS, 7, PAD, PAD]</code>），结果是形状 <code>(1, 4, 4)</code> 的矩阵：</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs tap">         key: <span class="hljs-number"> 0 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 2 </span> 3<br>query<span class="hljs-number"> 0 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]<br>query<span class="hljs-number"> 1 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]<br>query<span class="hljs-number"> 2 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 注意这一行：causal 本来允许看 key 2，</span><br>query<span class="hljs-number"> 3 </span>    [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 但 key 2/3 是 PAD，被 padding mask 屏蔽</span><br></code></pre></td></tr></table></figure>
+<p>既看不见未来（上三角为 0），也看不见 padding（后两列为 0）。</p>
+<p>注意 Encoder 的自注意力<strong>不需要</strong> causal mask——编码时整个源序列都是可见的，只需要 padding mask。对序列 2 来说，Encoder 用的 mask 就是：</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs tap">         key: <span class="hljs-number"> 0 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 2 </span> 3<br>任意 query  [ <span class="hljs-number"> 1 </span><span class="hljs-number"> 1 </span><span class="hljs-number"> 0 </span><span class="hljs-number"> 0 </span> ]    <span class="hljs-comment"># 所有位置都能互相看，唯独不看 PAD</span><br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="5-模型组件">5. 模型组件</h2>
+<h3 id="5-1-缩放点积注意力">5.1 缩放点积注意力</h3>
+<p>对应论文公式：</p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mtext>Attention</mtext><mo stretchy="false">(</mo><mi>Q</mi><mo separator="true">,</mo><mi>K</mi><mo separator="true">,</mo><mi>V</mi><mo stretchy="false">)</mo><mo>=</mo><mtext>softmax</mtext><mrow><mo fence="true">(</mo><mfrac><mrow><mi>Q</mi><msup><mi>K</mi><mi>T</mi></msup></mrow><msqrt><msub><mi>d</mi><mi>k</mi></msub></msqrt></mfrac><mo fence="true">)</mo></mrow><mi>V</mi></mrow><annotation encoding="application/x-tex">\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord text"><span class="mord">Attention</span></span><span class="mopen">(</span><span class="mord mathnormal">Q</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:2.4684em;vertical-align:-0.95em;"></span><span class="mord text"><span class="mord">softmax</span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.5183em;"><span style="top:-2.2528em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8572em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord"><span class="mord mathnormal">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3361em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.03148em;">k</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span><span style="top:-2.8172em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg xmlns="http://www.w3.org/2000/svg" width="400em" height="1.08em" viewBox="0 0 400000 1080" preserveAspectRatio="xMinYMin slice"><path d="M95,702
+c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,-10,-9.5,-14
+c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54
+c44.2,-33.3,65.8,-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10
+s173,378,173,378c0.7,0,35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429
+c69,-144,104.5,-217.7,106.5,-221
+l0 -0
+c5.3,-9.3,12,-14,20,-14
+H400000v40H845.2724
+s-225.272,467,-225.272,467s-235,486,-235,486c-2.7,4.7,-9,7,-19,7
+c-6,0,-10,-1,-12,-3s-194,-422,-194,-422s-65,47,-65,47z
+M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1828em;"><span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">Q</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.07153em;">K</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8413em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.13889em;">T</span></span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.93em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.22222em;">V</span></span></span></span></span></p>
+<p>代码实现（作为 <code>MultiHeadAttention</code> 的一个方法）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">scaled_dot_product_attention</span>(<span class="hljs-params">self, Q, K, V, mask=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    Q, K, V: (batch_size, num_heads, seq_len, d_k)</span><br><span class="hljs-string">    mask: 可广播到 (batch_size, num_heads, seq_len_q, seq_len_k)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    scores = torch.matmul(Q, K.transpose(-<span class="hljs-number">2</span>, -<span class="hljs-number">1</span>)) / math.sqrt(<span class="hljs-variable language_">self</span>.d_k)<br><br>    <span class="hljs-keyword">if</span> mask <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:<br>        <span class="hljs-comment"># mask == 0 的位置填充一个很小的数</span><br>        <span class="hljs-comment"># 这里不用 -inf，避免某些情况下 softmax 出现 NaN</span><br>        scores = scores.masked_fill(mask == <span class="hljs-number">0</span>, -<span class="hljs-number">1e9</span>)<br><br>    attn_weights = F.softmax(scores, dim=-<span class="hljs-number">1</span>)<br>    attn_weights = <span class="hljs-variable language_">self</span>.dropout(attn_weights)<br><br>    output = torch.matmul(attn_weights, V)<br><br>    <span class="hljs-keyword">return</span> output, attn_weights<br></code></pre></td></tr></table></figure>
+<p>逐步拆解（以列表翻转为直觉）：</p>
+<ol>
+<li><strong><code>QK^T</code></strong>：每个 query 位置与每个 key 位置算一个&quot;相关度得分&quot;。对翻转任务来说，模型要学会让输出的第 1 个位置去高度关注输入的最后一个位置。</li>
+<li><strong>除以 <code>√d_k</code></strong>：<code>d_k</code> 较大时点积的方差会随之增大，softmax 进入饱和区、梯度消失。缩放让得分的方差与维度无关。</li>
+<li><strong>mask 填充 <code>-1e9</code></strong>：被屏蔽位置的得分变成一个极大的负数，softmax 后权重约等于 0。这里刻意不用 <code>-inf</code>，避免整行都被 mask 时 softmax 出现 <code>NaN</code>。</li>
+<li><strong>乘 <code>V</code></strong>：按注意力权重对 value 加权求和，得到每个位置的输出表示。</li>
+</ol>
+<h3 id="5-2-多头注意力">5.2 多头注意力</h3>
+<p>多头注意力的思想是：<strong>把 <code>d_model</code> 切成 <code>num_heads</code> 份，每份独立做注意力，再拼回来</strong>。不同的头可以学习不同类型的依赖关系（比如一个头关注&quot;对称位置&quot;，另一个头关注&quot;相邻位置&quot;）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> math<br><br><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><span class="hljs-keyword">import</span> torch.nn.functional <span class="hljs-keyword">as</span> F<br><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">MultiHeadAttention</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, num_heads, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(MultiHeadAttention, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-keyword">assert</span> d_model % num_heads == <span class="hljs-number">0</span>, <span class="hljs-string">&quot;d_model 必须能被 num_heads 整除&quot;</span><br><br>        <span class="hljs-variable language_">self</span>.d_model = d_model<br>        <span class="hljs-variable language_">self</span>.num_heads = num_heads<br>        <span class="hljs-variable language_">self</span>.d_k = d_model // num_heads<br><br>        <span class="hljs-variable language_">self</span>.W_q = nn.Linear(d_model, d_model)<br>        <span class="hljs-variable language_">self</span>.W_k = nn.Linear(d_model, d_model)<br>        <span class="hljs-variable language_">self</span>.W_v = nn.Linear(d_model, d_model)<br>        <span class="hljs-variable language_">self</span>.W_o = nn.Linear(d_model, d_model)<br><br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">scaled_dot_product_attention</span>(<span class="hljs-params">self, Q, K, V, mask=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        Q, K, V: (batch_size, num_heads, seq_len, d_k)</span><br><span class="hljs-string">        mask: 可广播到 (batch_size, num_heads, seq_len_q, seq_len_k)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        scores = torch.matmul(Q, K.transpose(-<span class="hljs-number">2</span>, -<span class="hljs-number">1</span>)) / math.sqrt(<span class="hljs-variable language_">self</span>.d_k)<br><br>        <span class="hljs-keyword">if</span> mask <span class="hljs-keyword">is</span> <span class="hljs-keyword">not</span> <span class="hljs-literal">None</span>:<br>            scores = scores.masked_fill(mask == <span class="hljs-number">0</span>, -<span class="hljs-number">1e9</span>)<br><br>        attn_weights = F.softmax(scores, dim=-<span class="hljs-number">1</span>)<br>        attn_weights = <span class="hljs-variable language_">self</span>.dropout(attn_weights)<br><br>        output = torch.matmul(attn_weights, V)<br><br>        <span class="hljs-keyword">return</span> output, attn_weights<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, query, key, value, mask=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        query: (batch_size, seq_len_q, d_model)</span><br><span class="hljs-string">        key:   (batch_size, seq_len_k, d_model)</span><br><span class="hljs-string">        value: (batch_size, seq_len_v, d_model)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        batch_size = query.size(<span class="hljs-number">0</span>)<br><br>        Q = <span class="hljs-variable language_">self</span>.W_q(query)<br>        K = <span class="hljs-variable language_">self</span>.W_k(key)<br>        V = <span class="hljs-variable language_">self</span>.W_v(value)<br><br>        <span class="hljs-comment"># 拆成多头</span><br>        <span class="hljs-comment"># (B, L, d_model) -&gt; (B, L, H, d_k) -&gt; (B, H, L, d_k)</span><br>        Q = Q.view(batch_size, -<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.num_heads, <span class="hljs-variable language_">self</span>.d_k).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br>        K = K.view(batch_size, -<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.num_heads, <span class="hljs-variable language_">self</span>.d_k).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br>        V = V.view(batch_size, -<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.num_heads, <span class="hljs-variable language_">self</span>.d_k).transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br><br>        attn_output, attn_weights = <span class="hljs-variable language_">self</span>.scaled_dot_product_attention(<br>            Q, K, V, mask<br>        )<br><br>        <span class="hljs-comment"># 合并多头</span><br>        <span class="hljs-comment"># (B, H, L, d_k) -&gt; (B, L, H, d_k) -&gt; (B, L, d_model)</span><br>        attn_output = (<br>            attn_output.transpose(<span class="hljs-number">1</span>, <span class="hljs-number">2</span>)<br>            .contiguous()<br>            .view(batch_size, -<span class="hljs-number">1</span>, <span class="hljs-variable language_">self</span>.d_model)<br>        )<br><br>        output = <span class="hljs-variable language_">self</span>.W_o(attn_output)<br><br>        <span class="hljs-keyword">return</span> output, attn_weights<br></code></pre></td></tr></table></figure>
+<p>forward 中的核心是张量形状变换——<strong>拆头与并头</strong>。注意 <code>view</code> 只是&quot;重排&quot;没有新增参数，真正的可学习参数在 <code>W_q/W_k/W_v/W_o</code> 四个线性层里。另外 <code>transpose</code> 之后内存不连续，<code>view</code> 之前必须先调用 <code>.contiguous()</code>。</p>
+<h3 id="5-3-位置编码">5.3 位置编码</h3>
+<p>注意力本身是<strong>置换不变</strong>的——打乱输入顺序，输出只是跟着打乱，模型完全不知道&quot;谁在第几个位置&quot;。而翻转任务恰恰强依赖位置信息，所以必须显式注入位置。</p>
+<p>使用论文中的正弦位置编码：</p>
+<p class="katex-block "><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><msub><mi>E</mi><mrow><mo stretchy="false">(</mo><mi>p</mi><mi>o</mi><mi>s</mi><mo separator="true">,</mo><mn>2</mn><mi>i</mi><mo stretchy="false">)</mo></mrow></msub><mo>=</mo><mi>sin</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><mfrac><mrow><mi>p</mi><mi>o</mi><mi>s</mi></mrow><msup><mn>10000</mn><mrow><mn>2</mn><mi>i</mi><mi mathvariant="normal">/</mi><msub><mi>d</mi><mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow></msup></mfrac><mo fence="true">)</mo></mrow><mo separator="true">,</mo><mspace width="1em"/><mi>P</mi><msub><mi>E</mi><mrow><mo stretchy="false">(</mo><mi>p</mi><mi>o</mi><mi>s</mi><mo separator="true">,</mo><mn>2</mn><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></msub><mo>=</mo><mi>cos</mi><mo>⁡</mo><mrow><mo fence="true">(</mo><mfrac><mrow><mi>p</mi><mi>o</mi><mi>s</mi></mrow><msup><mn>10000</mn><mrow><mn>2</mn><mi>i</mi><mi mathvariant="normal">/</mi><msub><mi>d</mi><mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow></msup></mfrac><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right), \quad PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0385em;vertical-align:-0.3552em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">os</span><span class="mpunct mtight">,</span><span class="mord mtight">2</span><span class="mord mathnormal mtight">i</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.854em;vertical-align:-0.704em;"></span><span class="mop">sin</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size2">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.296em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1000</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.814em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathnormal mtight">i</span><span class="mord mtight">/</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3488em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1512em;"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="mord mathnormal">os</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.704em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size2">)</span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:1em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">P</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">E</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.5198em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathnormal mtight">p</span><span class="mord mathnormal mtight">os</span><span class="mpunct mtight">,</span><span class="mord mtight">2</span><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.3552em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.854em;vertical-align:-0.704em;"></span><span class="mop">cos</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size2">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.1076em;"><span style="top:-2.296em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1000</span><span class="mord"><span class="mord">0</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.814em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span><span class="mord mathnormal mtight">i</span><span class="mord mtight">/</span><span class="mord mtight"><span class="mord mathnormal mtight">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3448em;"><span style="top:-2.3488em;margin-left:0em;margin-right:0.0714em;"><span class="pstrut" style="height:2.5em;"></span><span class="sizing reset-size3 size1 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">m</span><span class="mord mathnormal mtight">o</span><span class="mord mathnormal mtight">d</span><span class="mord mathnormal mtight">e</span><span class="mord mathnormal mtight" style="margin-right:0.01968em;">l</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.1512em;"><span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal">p</span><span class="mord mathnormal">os</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.704em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size2">)</span></span></span></span></span></span></span></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">PositionalEncoding</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, max_len=<span class="hljs-number">512</span>, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(PositionalEncoding, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>        pe = torch.zeros(max_len, d_model)<br>        position = torch.arange(<span class="hljs-number">0</span>, max_len, dtype=torch.<span class="hljs-built_in">float</span>).unsqueeze(<span class="hljs-number">1</span>)<br>        div_term = torch.exp(<br>            torch.arange(<span class="hljs-number">0</span>, d_model, <span class="hljs-number">2</span>).<span class="hljs-built_in">float</span>() * (-math.log(<span class="hljs-number">10000.0</span>) / d_model)<br>        )<br><br>        pe[:, <span class="hljs-number">0</span>::<span class="hljs-number">2</span>] = torch.sin(position * div_term)<br>        pe[:, <span class="hljs-number">1</span>::<span class="hljs-number">2</span>] = torch.cos(position * div_term)<br><br>        pe = pe.unsqueeze(<span class="hljs-number">0</span>)  <span class="hljs-comment"># (1, max_len, d_model)</span><br>        <span class="hljs-variable language_">self</span>.register_buffer(<span class="hljs-string">&quot;pe&quot;</span>, pe)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        x: (batch_size, seq_len, d_model)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        x = x + <span class="hljs-variable language_">self</span>.pe[:, : x.size(<span class="hljs-number">1</span>)]<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.dropout(x)<br></code></pre></td></tr></table></figure>
+<ul>
+<li>不同维度对应不同频率的正弦波：低维波动快（编码局部位置），高维波动慢（编码全局位置）。</li>
+<li>用 <code>register_buffer</code> 注册而非常量属性：<code>buffer</code> 不是参数、不参与训练，但 <code>model.to(device)</code> 和 <code>state_dict</code> 都会正确处理它。</li>
+<li>forward 中直接加到 embedding 上：<code>x = x + self.pe[:, :x.size(1)]</code>。</li>
+</ul>
+<h3 id="5-4-前馈网络">5.4 前馈网络</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">FeedForward</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, d_ff, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(FeedForward, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.linear1 = nn.Linear(d_model, d_ff)<br>        <span class="hljs-variable language_">self</span>.linear2 = nn.Linear(d_ff, d_model)<br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>        x = <span class="hljs-variable language_">self</span>.linear1(x)<br>        x = F.relu(x)<br>        x = <span class="hljs-variable language_">self</span>.dropout(x)<br>        x = <span class="hljs-variable language_">self</span>.linear2(x)<br>        <span class="hljs-keyword">return</span> x<br></code></pre></td></tr></table></figure>
+<p>注意力负责&quot;混合不同位置的信息&quot;，FFN 负责&quot;对每个位置独立地做非线性变换&quot;。先升维再降维（<code>d_ff</code> 通常取 <code>4 × d_model</code>），提供模型的非线性表达能力。</p>
+<h3 id="5-5-Encoder-Layer-Decoder-Layer">5.5 Encoder Layer / Decoder Layer</h3>
+<p>每个子层都套着 <strong>残差连接 + LayerNorm</strong> 的壳（Post-LN 结构）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">EncoderLayer</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, num_heads, d_ff, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(EncoderLayer, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.self_attn = MultiHeadAttention(d_model, num_heads, dropout)<br>        <span class="hljs-variable language_">self</span>.feed_forward = FeedForward(d_model, d_ff, dropout)<br><br>        <span class="hljs-variable language_">self</span>.norm1 = nn.LayerNorm(d_model)<br>        <span class="hljs-variable language_">self</span>.norm2 = nn.LayerNorm(d_model)<br><br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, src, src_mask</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        src: (B, src_len, d_model)</span><br><span class="hljs-string">        src_mask: (B, 1, 1, src_len)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        attn_out, _ = <span class="hljs-variable language_">self</span>.self_attn(src, src, src, src_mask)<br>        src = <span class="hljs-variable language_">self</span>.norm1(src + <span class="hljs-variable language_">self</span>.dropout(attn_out))<br><br>        ff_out = <span class="hljs-variable language_">self</span>.feed_forward(src)<br>        src = <span class="hljs-variable language_">self</span>.norm2(src + <span class="hljs-variable language_">self</span>.dropout(ff_out))<br><br>        <span class="hljs-keyword">return</span> src<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>残差连接</strong>：<code>x + sublayer(x)</code>，让梯度可以绕过子层直接回传，深层网络才训得动。</li>
+<li><strong>LayerNorm</strong>：把每个 token 的特征分布稳定下来，加速收敛。</li>
+</ul>
+<p>Decoder Layer 比 Encoder 多一个 <strong>cross-attention</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">DecoderLayer</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, num_heads, d_ff, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(DecoderLayer, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.self_attn = MultiHeadAttention(d_model, num_heads, dropout)<br>        <span class="hljs-variable language_">self</span>.cross_attn = MultiHeadAttention(d_model, num_heads, dropout)<br>        <span class="hljs-variable language_">self</span>.feed_forward = FeedForward(d_model, d_ff, dropout)<br><br>        <span class="hljs-variable language_">self</span>.norm1 = nn.LayerNorm(d_model)<br>        <span class="hljs-variable language_">self</span>.norm2 = nn.LayerNorm(d_model)<br>        <span class="hljs-variable language_">self</span>.norm3 = nn.LayerNorm(d_model)<br><br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, tgt, memory, tgt_mask, memory_mask</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        tgt: (B, tgt_len, d_model)</span><br><span class="hljs-string">        memory: encoder output, (B, src_len, d_model)</span><br><span class="hljs-string"></span><br><span class="hljs-string">        tgt_mask: decoder self-attention mask</span><br><span class="hljs-string">                  (B, 1, tgt_len, tgt_len)</span><br><span class="hljs-string"></span><br><span class="hljs-string">        memory_mask: cross-attention mask</span><br><span class="hljs-string">                     (B, 1, 1, src_len)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br><br>        <span class="hljs-comment"># 1. Decoder self-attention</span><br>        attn_out, _ = <span class="hljs-variable language_">self</span>.self_attn(tgt, tgt, tgt, tgt_mask)<br>        tgt = <span class="hljs-variable language_">self</span>.norm1(tgt + <span class="hljs-variable language_">self</span>.dropout(attn_out))<br><br>        <span class="hljs-comment"># 2. Cross-attention</span><br>        attn_out, _ = <span class="hljs-variable language_">self</span>.cross_attn(tgt, memory, memory, memory_mask)<br>        tgt = <span class="hljs-variable language_">self</span>.norm2(tgt + <span class="hljs-variable language_">self</span>.dropout(attn_out))<br><br>        <span class="hljs-comment"># 3. Feed forward</span><br>        ff_out = <span class="hljs-variable language_">self</span>.feed_forward(tgt)<br>        tgt = <span class="hljs-variable language_">self</span>.norm3(tgt + <span class="hljs-variable language_">self</span>.dropout(ff_out))<br><br>        <span class="hljs-keyword">return</span> tgt<br></code></pre></td></tr></table></figure>
+<p>三个子层各司其职：</p>
+<ol>
+<li><strong>masked self-attention</strong>：只看已生成的目标前缀（causal mask）；</li>
+<li><strong>cross-attention</strong>：query 来自 Decoder，key/value 来自 Encoder 输出 <code>memory</code>——这是 Encoder 和 Decoder 之间的桥梁，Decoder 的每个位置通过它去&quot;查询&quot;源序列中相关的部分。翻转任务中，模型正是靠它学会&quot;当前该输出源序列倒数第几个元素&quot;；</li>
+<li><strong>FFN</strong>：逐位置非线性变换。</li>
+</ol>
+<h3 id="5-6-组装完整的-Encoder-Decoder-Transformer">5.6 组装完整的 Encoder-Decoder Transformer</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Transformer</span>(nn.Module):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params"></span><br><span class="hljs-params">        self,</span><br><span class="hljs-params">        src_vocab_size,</span><br><span class="hljs-params">        tgt_vocab_size,</span><br><span class="hljs-params">        d_model=<span class="hljs-number">128</span>,</span><br><span class="hljs-params">        num_heads=<span class="hljs-number">4</span>,</span><br><span class="hljs-params">        num_encoder_layers=<span class="hljs-number">2</span>,</span><br><span class="hljs-params">        num_decoder_layers=<span class="hljs-number">2</span>,</span><br><span class="hljs-params">        d_ff=<span class="hljs-number">512</span>,</span><br><span class="hljs-params">        dropout=<span class="hljs-number">0.1</span>,</span><br><span class="hljs-params">        pad_idx=PAD_IDX,</span><br><span class="hljs-params">        max_len=<span class="hljs-number">64</span>,</span><br><span class="hljs-params">    </span>):<br>        <span class="hljs-built_in">super</span>(Transformer, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.d_model = d_model<br>        <span class="hljs-variable language_">self</span>.pad_idx = pad_idx<br><br>        <span class="hljs-variable language_">self</span>.src_embedding = nn.Embedding(<br>            src_vocab_size,<br>            d_model,<br>            padding_idx=pad_idx,<br>        )<br><br>        <span class="hljs-variable language_">self</span>.tgt_embedding = nn.Embedding(<br>            tgt_vocab_size,<br>            d_model,<br>            padding_idx=pad_idx,<br>        )<br><br>        <span class="hljs-variable language_">self</span>.pos_enc = PositionalEncoding(d_model, max_len, dropout)<br><br>        <span class="hljs-variable language_">self</span>.encoder_layers = nn.ModuleList(<br>            [<br>                EncoderLayer(d_model, num_heads, d_ff, dropout)<br>                <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_encoder_layers)<br>            ]<br>        )<br><br>        <span class="hljs-variable language_">self</span>.decoder_layers = nn.ModuleList(<br>            [<br>                DecoderLayer(d_model, num_heads, d_ff, dropout)<br>                <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_decoder_layers)<br>            ]<br>        )<br><br>        <span class="hljs-variable language_">self</span>.generator = nn.Linear(d_model, tgt_vocab_size)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">make_src_mask</span>(<span class="hljs-params">self, src</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        src: (B, src_len)</span><br><span class="hljs-string">        return: (B, 1, 1, src_len)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        <span class="hljs-keyword">return</span> create_padding_mask(src, <span class="hljs-variable language_">self</span>.pad_idx)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">make_tgt_mask</span>(<span class="hljs-params">self, tgt</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        tgt: (B, tgt_len)</span><br><span class="hljs-string">        return: (B, 1, tgt_len, tgt_len)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        <span class="hljs-keyword">return</span> create_decoder_self_mask(tgt, <span class="hljs-variable language_">self</span>.pad_idx)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">encode</span>(<span class="hljs-params">self, src, src_mask=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-keyword">if</span> src_mask <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>            src_mask = <span class="hljs-variable language_">self</span>.make_src_mask(src)<br><br>        x = <span class="hljs-variable language_">self</span>.src_embedding(src) * math.sqrt(<span class="hljs-variable language_">self</span>.d_model)<br>        x = <span class="hljs-variable language_">self</span>.pos_enc(x)<br><br>        <span class="hljs-keyword">for</span> layer <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.encoder_layers:<br>            x = layer(x, src_mask)<br><br>        <span class="hljs-keyword">return</span> x<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">decode</span>(<span class="hljs-params">self, tgt, memory, tgt_mask=<span class="hljs-literal">None</span>, memory_mask=<span class="hljs-literal">None</span></span>):<br>        <span class="hljs-keyword">if</span> tgt_mask <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>            tgt_mask = <span class="hljs-variable language_">self</span>.make_tgt_mask(tgt)<br><br>        x = <span class="hljs-variable language_">self</span>.tgt_embedding(tgt) * math.sqrt(<span class="hljs-variable language_">self</span>.d_model)<br>        x = <span class="hljs-variable language_">self</span>.pos_enc(x)<br><br>        <span class="hljs-keyword">for</span> layer <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.decoder_layers:<br>            x = layer(x, memory, tgt_mask, memory_mask)<br><br>        <span class="hljs-keyword">return</span> x<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, src, tgt</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        src: (B, src_len)</span><br><span class="hljs-string">        tgt: (B, tgt_len)</span><br><span class="hljs-string"></span><br><span class="hljs-string">        tgt 是 decoder 的输入序列，通常以 &lt;BOS&gt; 开头。</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br><br>        <span class="hljs-comment"># Encoder</span><br>        src_mask = <span class="hljs-variable language_">self</span>.make_src_mask(src)<br>        memory = <span class="hljs-variable language_">self</span>.encode(src, src_mask)<br><br>        <span class="hljs-comment"># Decoder</span><br>        tgt_mask = <span class="hljs-variable language_">self</span>.make_tgt_mask(tgt)<br><br>        <span class="hljs-comment"># cross-attention 中，key/value 来自 encoder 输出</span><br>        <span class="hljs-comment"># 所以只需要 mask encoder 的 padding</span><br>        memory_mask = src_mask<br><br>        dec_out = <span class="hljs-variable language_">self</span>.decode(<br>            tgt=tgt,<br>            memory=memory,<br>            tgt_mask=tgt_mask,<br>            memory_mask=memory_mask,<br>        )<br><br>        logits = <span class="hljs-variable language_">self</span>.generator(dec_out)<br><br>        <span class="hljs-keyword">return</span> logits<br></code></pre></td></tr></table></figure>
+<p>几个关键细节：</p>
+<p><strong>Embedding 缩放</strong>——<code>x = self.src_embedding(src) * math.sqrt(self.d_model)</code>：论文中的做法，embedding 乘以 <code>√d_model</code>，使其数值尺度与位置编码相当，避免位置信息被淹没。</p>
+<p><strong>encode / decode 分离</strong>：把编码和解码写成独立方法，推理时可以<strong>只跑一次 Encoder</strong>，然后循环调用 Decoder 逐 token 生成。</p>
+<p><strong>generator</strong>：最后一层线性把 <code>d_model</code> 维表示映射回词表大小的 logits。</p>
+<h3 id="5-7-Decoder-Only（GPT-风格）变体">5.7 Decoder-Only（GPT 风格）变体</h3>
+<p>GPT 风格的 block 没有 cross-attention，整条规定格式的序列 <code>&lt;BOS&gt; src &lt;EOS&gt; tgt &lt;EOS&gt;</code> 全靠 masked self-attention 自己消化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">DecoderOnlyLayer</span>(nn.Module):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    GPT 风格的 block：只有 masked self-attention + FFN，没有 cross-attention。</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, d_model, num_heads, d_ff, dropout=<span class="hljs-number">0.1</span></span>):<br>        <span class="hljs-built_in">super</span>(DecoderOnlyLayer, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.self_attn = MultiHeadAttention(d_model, num_heads, dropout)<br>        <span class="hljs-variable language_">self</span>.feed_forward = FeedForward(d_model, d_ff, dropout)<br><br>        <span class="hljs-variable language_">self</span>.norm1 = nn.LayerNorm(d_model)<br>        <span class="hljs-variable language_">self</span>.norm2 = nn.LayerNorm(d_model)<br><br>        <span class="hljs-variable language_">self</span>.dropout = nn.Dropout(dropout)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x, mask</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        x: (B, seq_len, d_model)</span><br><span class="hljs-string">        mask: causal + padding mask, (B, 1, seq_len, seq_len)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        attn_out, _ = <span class="hljs-variable language_">self</span>.self_attn(x, x, x, mask)<br>        x = <span class="hljs-variable language_">self</span>.norm1(x + <span class="hljs-variable language_">self</span>.dropout(attn_out))<br><br>        ff_out = <span class="hljs-variable language_">self</span>.feed_forward(x)<br>        x = <span class="hljs-variable language_">self</span>.norm2(x + <span class="hljs-variable language_">self</span>.dropout(ff_out))<br><br>        <span class="hljs-keyword">return</span> x<br><br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">DecoderOnlyTransformer</span>(nn.Module):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    单序列输入（prompt + target 拼接），用 causal mask 做 next-token 预测。</span><br><span class="hljs-string"></span><br><span class="hljs-string">    序列格式: &lt;BOS&gt; src... &lt;EOS&gt; tgt... &lt;EOS&gt;</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params"></span><br><span class="hljs-params">        self,</span><br><span class="hljs-params">        vocab_size,</span><br><span class="hljs-params">        d_model=<span class="hljs-number">128</span>,</span><br><span class="hljs-params">        num_heads=<span class="hljs-number">4</span>,</span><br><span class="hljs-params">        num_layers=<span class="hljs-number">2</span>,</span><br><span class="hljs-params">        d_ff=<span class="hljs-number">512</span>,</span><br><span class="hljs-params">        dropout=<span class="hljs-number">0.1</span>,</span><br><span class="hljs-params">        pad_idx=PAD_IDX,</span><br><span class="hljs-params">        max_len=<span class="hljs-number">64</span>,</span><br><span class="hljs-params">    </span>):<br>        <span class="hljs-built_in">super</span>(DecoderOnlyTransformer, <span class="hljs-variable language_">self</span>).__init__()<br><br>        <span class="hljs-variable language_">self</span>.d_model = d_model<br>        <span class="hljs-variable language_">self</span>.pad_idx = pad_idx<br><br>        <span class="hljs-variable language_">self</span>.embedding = nn.Embedding(<br>            vocab_size,<br>            d_model,<br>            padding_idx=pad_idx,<br>        )<br><br>        <span class="hljs-variable language_">self</span>.pos_enc = PositionalEncoding(d_model, max_len, dropout)<br><br>        <span class="hljs-variable language_">self</span>.layers = nn.ModuleList(<br>            [<br>                DecoderOnlyLayer(d_model, num_heads, d_ff, dropout)<br>                <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(num_layers)<br>            ]<br>        )<br><br>        <span class="hljs-variable language_">self</span>.generator = nn.Linear(d_model, vocab_size)<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">forward</span>(<span class="hljs-params">self, x</span>):<br>        <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">        x: (B, seq_len)，token id 序列（右 padding）</span><br><span class="hljs-string">        return: (B, seq_len, vocab_size)</span><br><span class="hljs-string">        &quot;&quot;&quot;</span><br>        <span class="hljs-comment"># causal + padding mask，模型内部自动构建</span><br>        mask = create_decoder_self_mask(x, <span class="hljs-variable language_">self</span>.pad_idx)<br><br>        h = <span class="hljs-variable language_">self</span>.embedding(x) * math.sqrt(<span class="hljs-variable language_">self</span>.d_model)<br>        h = <span class="hljs-variable language_">self</span>.pos_enc(h)<br><br>        <span class="hljs-keyword">for</span> layer <span class="hljs-keyword">in</span> <span class="hljs-variable language_">self</span>.layers:<br>            h = layer(h, mask)<br><br>        logits = <span class="hljs-variable language_">self</span>.generator(h)<br><br>        <span class="hljs-keyword">return</span> logits<br></code></pre></td></tr></table></figure>
+<p>整个模型的 forward 极其简洁——mask 在内部自动构建，输入一条 token 序列，输出每个位置下一 token 的 logits。</p>
+<hr>
+<h2 id="6-训练流程">6. 训练流程</h2>
+<h3 id="6-1-损失函数与优化器">6.1 损失函数与优化器</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">optimizer = torch.optim.Adam(model.parameters(), lr=<span class="hljs-number">3e-4</span>)<br>criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)<br></code></pre></td></tr></table></figure>
+<ul>
+<li>逐 token 的交叉熵：logits <code>(B, L, V)</code> 与标签 <code>(B, L)</code> 都展平后计算。</li>
+<li><strong><code>ignore_index=PAD_IDX</code></strong> 是数据补齐方案的最后一块拼图：padding 位（以及 decoder-only 中被置 PAD 的 prompt 位）不产生任何损失和梯度。</li>
+</ul>
+<h3 id="6-2-训练循环">6.2 训练循环</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> torch<br><span class="hljs-keyword">import</span> torch.nn <span class="hljs-keyword">as</span> nn<br><span class="hljs-keyword">from</span> torch.utils.data <span class="hljs-keyword">import</span> DataLoader<br><span class="hljs-keyword">from</span> tqdm <span class="hljs-keyword">import</span> tqdm<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">train</span>(<span class="hljs-params">model, train_loader, device, epochs, lr, grad_clip, vocab_size, arch</span>):<br>    optimizer = torch.optim.Adam(model.parameters(), lr=lr)<br>    criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)<br><br>    <span class="hljs-keyword">for</span> epoch <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, epochs + <span class="hljs-number">1</span>):<br>        model.train()<br>        total_loss = <span class="hljs-number">0.0</span><br>        total_tokens = <span class="hljs-number">0</span><br><br>        <span class="hljs-comment"># tqdm 进度条：显示每个 batch 的训练进度和平均 loss</span><br>        pbar = tqdm(<br>            train_loader,<br>            desc=<span class="hljs-string">f&quot;Epoch <span class="hljs-subst">&#123;epoch&#125;</span>/<span class="hljs-subst">&#123;epochs&#125;</span>&quot;</span>,<br>            leave=<span class="hljs-literal">True</span>,<br>        )<br><br>        <span class="hljs-keyword">for</span> src, tgt_in, tgt_out <span class="hljs-keyword">in</span> pbar:<br>            src = src.to(device)<br>            tgt_in = tgt_in.to(device)<br>            tgt_out = tgt_out.to(device)<br><br>            <span class="hljs-keyword">if</span> arch == <span class="hljs-string">&quot;decoder_only&quot;</span>:<br>                <span class="hljs-comment"># decoder-only: tgt_in 是 input_ids，tgt_out 是 labels</span><br>                <span class="hljs-comment"># （prompt 部分已置 PAD，被 loss 忽略）</span><br>                logits = model(tgt_in)<br>            <span class="hljs-keyword">else</span>:<br>                logits = model(src, tgt_in)<br><br>            loss = criterion(<br>                logits.view(-<span class="hljs-number">1</span>, vocab_size),<br>                tgt_out.view(-<span class="hljs-number">1</span>),<br>            )<br><br>            optimizer.zero_grad()<br>            loss.backward()<br>            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)<br>            optimizer.step()<br><br>            non_pad_tokens = (tgt_out != PAD_IDX).<span class="hljs-built_in">sum</span>().item()<br>            total_loss += loss.item() * non_pad_tokens<br>            total_tokens += non_pad_tokens<br><br>            <span class="hljs-comment"># 在进度条右侧实时显示平均 loss</span><br>            pbar.set_postfix(loss=<span class="hljs-string">f&quot;<span class="hljs-subst">&#123;total_loss / <span class="hljs-built_in">max</span>(total_tokens, <span class="hljs-number">1</span>):<span class="hljs-number">.4</span>f&#125;</span>&quot;</span>)<br><br>        avg_loss = total_loss / <span class="hljs-built_in">max</span>(total_tokens, <span class="hljs-number">1</span>)<br>        tqdm.write(<span class="hljs-string">f&quot;Epoch <span class="hljs-subst">&#123;epoch&#125;</span> finished, avg loss: <span class="hljs-subst">&#123;avg_loss:<span class="hljs-number">.4</span>f&#125;</span>&quot;</span>)<br></code></pre></td></tr></table></figure>
+<p>要点：</p>
+<ul>
+<li><strong>Teacher forcing</strong>：训练时把真实的 <code>tgt_in</code>（含 <code>&lt;BOS&gt;</code> 的前缀）喂给 Decoder，而不是喂模型自己上一步的预测，收敛更快更稳。</li>
+<li><strong>梯度裁剪</strong>（<code>clip_grad_norm_</code>）：限制梯度范数不超过 1.0，防止训练初期 loss 震荡。</li>
+<li>tqdm 进度条上实时显示按有效 token 数加权的平均 loss。</li>
+</ul>
+<h3 id="6-3-评估：整序列完全正确率">6.3 评估：整序列完全正确率</h3>
+<p>对翻转任务，&quot;逐 token 准确率&quot;没有意义——错一个位置整条就错了，所以评估指标是<strong>整条序列完全匹配的比例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-meta">@torch.no_grad()</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">evaluate</span>(<span class="hljs-params">model, test_dataset, device, batch_size, arch, collate, num_show=<span class="hljs-number">5</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    在独立的测试集上评估（测试集与训练集使用不同种子生成，无重叠）。</span><br><span class="hljs-string">    返回整序列完全正确的准确率。</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    model.<span class="hljs-built_in">eval</span>()<br><br>    test_loader = DataLoader(<br>        test_dataset,<br>        batch_size=batch_size,<br>        shuffle=<span class="hljs-literal">False</span>,<br>        collate_fn=collate,<br>    )<br><br>    correct = <span class="hljs-number">0</span><br>    total = <span class="hljs-number">0</span><br><br>    <span class="hljs-keyword">for</span> src, _, tgt_out <span class="hljs-keyword">in</span> tqdm(test_loader, desc=<span class="hljs-string">&quot;Evaluating&quot;</span>, leave=<span class="hljs-literal">False</span>):<br>        src = src.to(device)<br><br>        <span class="hljs-keyword">if</span> arch == <span class="hljs-string">&quot;decoder_only&quot;</span>:<br>            prompt = build_decoder_only_prompt(src)<br>            prompt_len = prompt.size(<span class="hljs-number">1</span>)<br>            pred = greedy_decode_decoder_only(<br>                model, prompt, max_len=src.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span><br>            )<br>            <span class="hljs-comment"># 去掉 prompt 部分，只保留生成的内容</span><br>            pred = pred[:, prompt_len:]<br><br>            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(src.size(<span class="hljs-number">0</span>)):<br>                pred_str = tensor_to_str(pred[i])<br>                tgt_str = expected_reverse_str(src[i])<br>                <span class="hljs-keyword">if</span> pred_str == tgt_str:<br>                    correct += <span class="hljs-number">1</span><br>                total += <span class="hljs-number">1</span><br>        <span class="hljs-keyword">else</span>:<br>            pred = greedy_decode(model, src, max_len=src.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span>)<br><br>            <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(src.size(<span class="hljs-number">0</span>)):<br>                pred_str = tensor_to_str(pred[i])<br>                tgt_str = tensor_to_str(tgt_out[i])<br>                <span class="hljs-keyword">if</span> pred_str == tgt_str:<br>                    correct += <span class="hljs-number">1</span><br>                total += <span class="hljs-number">1</span><br><br>    acc = correct / <span class="hljs-built_in">max</span>(total, <span class="hljs-number">1</span>)<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Test accuracy: <span class="hljs-subst">&#123;acc:<span class="hljs-number">.4</span>f&#125;</span> (<span class="hljs-subst">&#123;correct&#125;</span>/<span class="hljs-subst">&#123;total&#125;</span>)&quot;</span>)<br>    <span class="hljs-keyword">return</span> acc<br></code></pre></td></tr></table></figure>
+<h3 id="6-4-训练入口与-checkpoint-保存">6.4 训练入口与 checkpoint 保存</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">save_checkpoint</span>(<span class="hljs-params">model, config_dict, path=<span class="hljs-string">&quot;checkpoint.pt&quot;</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;训练结束后保存模型权重与超参数配置。&quot;&quot;&quot;</span><br>    torch.save(<br>        &#123;<br>            <span class="hljs-string">&quot;model_state_dict&quot;</span>: model.state_dict(),<br>            <span class="hljs-string">&quot;config&quot;</span>: config_dict,<br>        &#125;,<br>        path,<br>    )<br>    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;Checkpoint saved to <span class="hljs-subst">&#123;path&#125;</span>&quot;</span>)<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">run</span>():<br>    device = torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)<br><br>    torch.manual_seed(<span class="hljs-number">0</span>)<br><br>    <span class="hljs-comment"># 训练集与测试集使用不同的种子生成，保证测试样本不来自训练集</span><br>    train_dataset = build_dataset(num_samples=<span class="hljs-number">200000</span>, seed=<span class="hljs-number">0</span>)<br>    test_dataset = build_dataset(num_samples=<span class="hljs-number">200</span>, seed=<span class="hljs-number">42</span>)<br><br>    train_loader = DataLoader(<br>        train_dataset,<br>        batch_size=<span class="hljs-number">64</span>,<br>        shuffle=<span class="hljs-literal">True</span>,<br>        collate_fn=get_collate_fn(),<br>    )<br><br>    model = build_model(device)<br><br>    train(model, train_loader, device)<br><br>    save_checkpoint(model, &#123;...超参数...&#125;)<br><br>    evaluate(model, test_dataset, device)<br></code></pre></td></tr></table></figure>
+<p>checkpoint 里同时保存 <code>model_state_dict</code> 和模型超参数（<code>d_model</code>、层数、架构类型等），因此推理端不需要猜配置。</p>
+<hr>
+<h2 id="7-推理与贪心解码">7. 推理与贪心解码</h2>
+<h3 id="7-1-token-序列转可读字符串">7.1 token 序列转可读字符串</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">tensor_to_str</span>(<span class="hljs-params">x</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    将 token id 序列转成可读字符串。</span><br><span class="hljs-string">    遇到 EOS 停止。</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    result = []<br><br>    <span class="hljs-keyword">for</span> idx <span class="hljs-keyword">in</span> x:<br>        idx = idx.item() <span class="hljs-keyword">if</span> torch.is_tensor(idx) <span class="hljs-keyword">else</span> <span class="hljs-built_in">int</span>(idx)<br><br>        <span class="hljs-keyword">if</span> idx == EOS_IDX:<br>            <span class="hljs-keyword">break</span><br><br>        <span class="hljs-keyword">if</span> idx <span class="hljs-keyword">in</span> (PAD_IDX, BOS_IDX):<br>            <span class="hljs-keyword">continue</span><br><br>        <span class="hljs-comment"># 3 ~ 12 映射回 0 ~ 9</span><br>        result.append(<span class="hljs-built_in">str</span>(idx - <span class="hljs-number">3</span>))<br><br>    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot; &quot;</span>.join(result)<br></code></pre></td></tr></table></figure>
+<h3 id="7-2-Encoder-Decoder-的贪心解码">7.2 Encoder-Decoder 的贪心解码</h3>
+<p>推理时没有真实目标可用，只能<strong>自回归</strong>地一个 token 一个 token 生成：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-meta">@torch.no_grad()</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">greedy_decode</span>(<span class="hljs-params">model, src, max_len=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    src: (batch_size, src_len)</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    model.<span class="hljs-built_in">eval</span>()<br><br>    <span class="hljs-keyword">if</span> max_len <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>        max_len = src.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span><br><br>    src_mask = model.make_src_mask(src)<br><br>    <span class="hljs-comment"># Encoder 只跑一次</span><br>    memory = model.encode(src, src_mask)<br><br>    <span class="hljs-comment"># Decoder 输入从 &lt;BOS&gt; 开始</span><br>    ys = torch.full(<br>        (src.size(<span class="hljs-number">0</span>), <span class="hljs-number">1</span>),<br>        BOS_IDX,<br>        dtype=torch.long,<br>        device=src.device,<br>    )<br><br>    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_len):<br>        tgt_mask = model.make_tgt_mask(ys)<br><br>        dec_out = model.decode(<br>            tgt=ys,<br>            memory=memory,<br>            tgt_mask=tgt_mask,<br>            memory_mask=src_mask,<br>        )<br><br>        logits = model.generator(dec_out)<br><br>        next_token = logits[:, -<span class="hljs-number">1</span>:].argmax(dim=-<span class="hljs-number">1</span>)<br><br>        ys = torch.cat([ys, next_token], dim=<span class="hljs-number">1</span>)<br><br>        <span class="hljs-keyword">if</span> (next_token == EOS_IDX).<span class="hljs-built_in">all</span>():<br>            <span class="hljs-keyword">break</span><br><br>    <span class="hljs-keyword">return</span> ys<br></code></pre></td></tr></table></figure>
+<ul>
+<li><strong>贪心解码</strong>：每步取 <code>argmax</code>，简单直接。对翻转这种确定性任务足够好（beam search 主要提升开放性生成任务）。</li>
+<li><code>memory</code> 在循环外计算一次复用，是标准的推理优化。</li>
+<li>每步只取 <code>logits[:, -1:]</code>（最后一个位置的预测）作为新 token。</li>
+<li>全部样本都生成 <code>&lt;EOS&gt;</code> 就提前停止。</li>
+</ul>
+<h3 id="7-3-Decoder-Only-的解码">7.3 Decoder-Only 的解码</h3>
+<p>把 prompt <code>&lt;BOS&gt; src &lt;EOS&gt;</code> 喂进去让模型续写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> torch.nn.utils.rnn <span class="hljs-keyword">import</span> pad_sequence<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">build_decoder_only_prompt</span>(<span class="hljs-params">src</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    把 encoder 输入的 src 序列转成 decoder-only 的 prompt。</span><br><span class="hljs-string"></span><br><span class="hljs-string">    src: (batch_size, src_len)，含 PAD</span><br><span class="hljs-string">    return: (batch_size, max_len + 2) 的 &lt;BOS&gt; src &lt;EOS&gt;（右侧 PAD 补齐）</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    rows = []<br><br>    <span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> src:<br>        ids = row[row != PAD_IDX]<br>        bos = torch.tensor([BOS_IDX], dtype=torch.long, device=src.device)<br>        eos = torch.tensor([EOS_IDX], dtype=torch.long, device=src.device)<br>        rows.append(torch.cat([bos, ids, eos]))<br><br>    <span class="hljs-keyword">return</span> pad_sequence(rows, batch_first=<span class="hljs-literal">True</span>, padding_value=PAD_IDX)<br><br><br><span class="hljs-meta">@torch.no_grad()</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">greedy_decode_decoder_only</span>(<span class="hljs-params">model, prompt, max_len=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    decoder-only 模型的贪心解码。</span><br><span class="hljs-string"></span><br><span class="hljs-string">    prompt: (batch_size, prompt_len)，格式 &lt;BOS&gt; src... &lt;EOS&gt;（可有右 PAD）</span><br><span class="hljs-string">    return: (batch_size, prompt_len + gen_len)，包含 prompt 在内的完整序列</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    model.<span class="hljs-built_in">eval</span>()<br><br>    <span class="hljs-keyword">if</span> max_len <span class="hljs-keyword">is</span> <span class="hljs-literal">None</span>:<br>        max_len = prompt.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span><br><br>    ys = prompt<br><br>    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(max_len):<br>        logits = model(ys)<br><br>        next_token = logits[:, -<span class="hljs-number">1</span>:].argmax(dim=-<span class="hljs-number">1</span>)<br><br>        ys = torch.cat([ys, next_token], dim=<span class="hljs-number">1</span>)<br><br>        <span class="hljs-keyword">if</span> (next_token == EOS_IDX).<span class="hljs-built_in">all</span>():<br>            <span class="hljs-keyword">break</span><br><br>    <span class="hljs-keyword">return</span> ys<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">expected_reverse_str</span>(<span class="hljs-params">src_row</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;</span><br><span class="hljs-string">    由一条 src 序列计算期望的反转结果字符串（用于 decoder-only 评估）。</span><br><span class="hljs-string"></span><br><span class="hljs-string">    src_row: (src_len,) token id 张量，含 PAD</span><br><span class="hljs-string">    &quot;&quot;&quot;</span><br>    ids = [t.item() <span class="hljs-keyword">for</span> t <span class="hljs-keyword">in</span> src_row <span class="hljs-keyword">if</span> t.item() != PAD_IDX]<br>    target = torch.tensor(ids[::-<span class="hljs-number">1</span>] + [EOS_IDX], dtype=torch.long)<br>    <span class="hljs-keyword">return</span> tensor_to_str(target)<br></code></pre></td></tr></table></figure>
+<p>生成完成后切掉 prompt 部分即得结果。</p>
+<h3 id="7-4-加载模型做反转">7.4 加载模型做反转</h3>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">def</span> <span class="hljs-title function_">load_model</span>(<span class="hljs-params">checkpoint_path=<span class="hljs-string">&quot;checkpoint.pt&quot;</span>, device=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;加载保存的 checkpoint，按其中记录的架构构建并返回模型。&quot;&quot;&quot;</span><br>    device = device <span class="hljs-keyword">or</span> torch.device(<span class="hljs-string">&quot;cuda&quot;</span> <span class="hljs-keyword">if</span> torch.cuda.is_available() <span class="hljs-keyword">else</span> <span class="hljs-string">&quot;cpu&quot;</span>)<br><br>    checkpoint = torch.load(checkpoint_path, map_location=device)<br>    cfg = checkpoint.get(<span class="hljs-string">&quot;config&quot;</span>, &#123;&#125;)<br>    arch = cfg.get(<span class="hljs-string">&quot;architecture&quot;</span>, <span class="hljs-string">&quot;encoder_decoder&quot;</span>)<br><br>    <span class="hljs-keyword">if</span> arch == <span class="hljs-string">&quot;decoder_only&quot;</span>:<br>        model = DecoderOnlyTransformer(<br>            vocab_size=<span class="hljs-number">13</span>,<br>            d_model=cfg[<span class="hljs-string">&quot;d_model&quot;</span>],<br>            num_heads=cfg[<span class="hljs-string">&quot;num_heads&quot;</span>],<br>            num_layers=cfg[<span class="hljs-string">&quot;num_decoder_layers&quot;</span>],<br>            d_ff=cfg[<span class="hljs-string">&quot;d_ff&quot;</span>],<br>            dropout=cfg[<span class="hljs-string">&quot;dropout&quot;</span>],<br>            pad_idx=PAD_IDX,<br>            max_len=cfg[<span class="hljs-string">&quot;max_len&quot;</span>],<br>        ).to(device)<br>    <span class="hljs-keyword">else</span>:<br>        model = Transformer(<br>            src_vocab_size=<span class="hljs-number">13</span>,<br>            tgt_vocab_size=<span class="hljs-number">13</span>,<br>            d_model=cfg[<span class="hljs-string">&quot;d_model&quot;</span>],<br>            num_heads=cfg[<span class="hljs-string">&quot;num_heads&quot;</span>],<br>            num_encoder_layers=cfg[<span class="hljs-string">&quot;num_encoder_layers&quot;</span>],<br>            num_decoder_layers=cfg[<span class="hljs-string">&quot;num_decoder_layers&quot;</span>],<br>            d_ff=cfg[<span class="hljs-string">&quot;d_ff&quot;</span>],<br>            dropout=cfg[<span class="hljs-string">&quot;dropout&quot;</span>],<br>            pad_idx=PAD_IDX,<br>            max_len=cfg[<span class="hljs-string">&quot;max_len&quot;</span>],<br>        ).to(device)<br><br>    model.load_state_dict(checkpoint[<span class="hljs-string">&quot;model_state_dict&quot;</span>])<br>    model.<span class="hljs-built_in">eval</span>()<br><br>    <span class="hljs-keyword">return</span> model, device, arch<br><br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">digits_to_tensor</span>(<span class="hljs-params">digits, device</span>):<br>    <span class="hljs-string">&quot;&quot;&quot;把 0~9 的数字列表转成模型输入的 token id 张量 (1, len)。&quot;&quot;&quot;</span><br>    token_ids = torch.tensor([d + <span class="hljs-number">3</span> <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> digits], dtype=torch.long)<br>    <span class="hljs-keyword">return</span> token_ids.unsqueeze(<span class="hljs-number">0</span>).to(device)<br><br><br><span class="hljs-meta">@torch.no_grad()</span><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">reverse</span>(<span class="hljs-params">model, digits, device, arch=<span class="hljs-string">&quot;encoder_decoder&quot;</span></span>):<br>    <span class="hljs-string">&quot;&quot;&quot;对一组数字列表做反转，返回预测出的数字列表。&quot;&quot;&quot;</span><br>    src = digits_to_tensor(digits, device)<br><br>    <span class="hljs-keyword">if</span> arch == <span class="hljs-string">&quot;decoder_only&quot;</span>:<br>        <span class="hljs-comment"># prompt: &lt;BOS&gt; src &lt;EOS&gt;，让模型自回归续写</span><br>        bos = torch.tensor([[BOS_IDX]], dtype=torch.long, device=device)<br>        eos = torch.tensor([[EOS_IDX]], dtype=torch.long, device=device)<br>        prompt = torch.cat([bos, src, eos], dim=<span class="hljs-number">1</span>)<br><br>        pred = greedy_decode_decoder_only(model, prompt, max_len=src.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span>)<br>        pred_str = tensor_to_str(pred[<span class="hljs-number">0</span>, prompt.size(<span class="hljs-number">1</span>):])<br>    <span class="hljs-keyword">else</span>:<br>        pred = greedy_decode(model, src, max_len=src.size(<span class="hljs-number">1</span>) + <span class="hljs-number">5</span>)<br>        pred_str = tensor_to_str(pred[<span class="hljs-number">0</span>])<br><br>    <span class="hljs-keyword">return</span> [<span class="hljs-built_in">int</span>(x) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> pred_str.split()] <span class="hljs-keyword">if</span> pred_str <span class="hljs-keyword">else</span> []<br><br><br><span class="hljs-comment"># 使用示例</span><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    model, device, arch = load_model()<br><br>    <span class="hljs-keyword">for</span> digits <span class="hljs-keyword">in</span> [[<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>], [<span class="hljs-number">9</span>, <span class="hljs-number">8</span>, <span class="hljs-number">7</span>, <span class="hljs-number">6</span>], [<span class="hljs-number">0</span>, <span class="hljs-number">5</span>, <span class="hljs-number">3</span>, <span class="hljs-number">7</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>]]:<br>        pred = reverse(model, digits, device, arch)<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;input    : <span class="hljs-subst">&#123;digits&#125;</span>&quot;</span>)<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;expected :&quot;</span>, <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-built_in">str</span>(d) <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> <span class="hljs-built_in">reversed</span>(digits)))<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;pred     :&quot;</span>, <span class="hljs-string">&quot; &quot;</span>.join(<span class="hljs-built_in">str</span>(d) <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> pred))<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;correct  :&quot;</span>, pred == <span class="hljs-built_in">list</span>(<span class="hljs-built_in">reversed</span>(digits)))<br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="8-超参数与训练效果">8. 超参数与训练效果</h2>
+<table>
+<thead>
+<tr>
+<th>超参数</th>
+<th>值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>D_MODEL</code></td>
+<td>128</td>
+<td>模型维度</td>
+</tr>
+<tr>
+<td><code>NUM_HEADS</code></td>
+<td>4</td>
+<td>注意力头数，每头 <code>d_k = 32</code></td>
+</tr>
+<tr>
+<td><code>NUM_ENCODER_LAYERS</code></td>
+<td>2</td>
+<td>Encoder 层数</td>
+</tr>
+<tr>
+<td><code>NUM_DECODER_LAYERS</code></td>
+<td>4</td>
+<td>Decoder 层数</td>
+</tr>
+<tr>
+<td><code>D_FF</code></td>
+<td>512</td>
+<td>FFN 隐藏维度（4 × d_model）</td>
+</tr>
+<tr>
+<td><code>DROPOUT</code></td>
+<td>0.1</td>
+<td></td>
+</tr>
+<tr>
+<td><code>BATCH_SIZE</code></td>
+<td>64</td>
+<td></td>
+</tr>
+<tr>
+<td><code>EPOCHS</code></td>
+<td>9</td>
+<td></td>
+</tr>
+<tr>
+<td><code>LR</code></td>
+<td>3e-4</td>
+<td>Adam</td>
+</tr>
+<tr>
+<td><code>TRAIN_NUM_SAMPLES</code></td>
+<td>200,000</td>
+<td>随机生成的训练样本数</td>
+</tr>
+<tr>
+<td>序列长度</td>
+<td>3 ~ 12</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>这个规模的模型（checkpoint 约 3MB）在 20 万随机样本上训练几个 epoch 后，测试集上的整序列准确率可以达到 <strong>~100%</strong>——模型完全学会了翻转规则，而不是背下了训练集（测试集种子不同、无重叠）。</p>
+<hr>
+<h2 id="9-常见问题与思考">9. 常见问题与思考</h2>
+<p><strong>Q1：为什么训练收敛但推理时输出不对？</strong><br>
+最常见的原因是 mask 错了。自查清单：① Decoder 自注意力是否用了 causal mask（训练时 teacher forcing 如果忘了 causal mask，模型会偷看答案，loss 极低但推理全错）；② mask 的 1/0 约定是否和 <code>masked_fill(mask == 0, -1e9)</code> 一致；③ cross-attention 的 mask 应该用 <strong>src</strong> 的 padding mask，不是 tgt 的。</p>
+<p><strong>Q2：为什么 embedding 要乘 <code>√d_model</code>？</strong><br>
+让 token embedding 与位置编码数值尺度相当。位置编码的值域是 <code>[-1, 1]</code>，若 embedding 初始化得较小，位置信息会在相加时被淹没。</p>
+<p><strong>Q3：<code>mask == 0</code> 处为什么填 <code>-1e9</code> 而不是 <code>-inf</code>？</strong><br>
+如果某一行所有 key 都被 mask（极端情况下），<code>softmax(-inf, -inf, ...)</code> 会得到 <code>NaN</code> 并沿计算图传播。<code>-1e9</code> 是一个足够小的有限值，softmax 后权重近似为 0 且不会产生 <code>NaN</code>。</p>
+<p><strong>Q4：翻转任务里模型学到了什么？</strong><br>
+可以把注意力权重画出来观察：训练好的模型在 cross-attention 中，输出第 <code>i</code> 个位置时几乎把所有注意力权重放在输入的第 <code>n-1-i</code> 个位置上——它真正学会了&quot;对称复制&quot;这个算法，这正是 Transformer 位置外推能力的直观体现。</p>
+<p><strong>Q5：Encoder-Decoder 和 Decoder-Only 怎么选？</strong><br>
+对本任务两者都能轻松收敛。Encoder-Decoder 结构更贴合&quot;源/目标分离&quot;的 Seq2Seq 设定，且推理时 Encoder 只跑一次，效率略高；Decoder-Only 实现更简单、与主流大语言模型（GPT 系列）同构，工程上更容易扩展。本文两种都实现了，改配置中的 <code>ARCHITECTURE</code> 即可对比。</p>
+<p><strong>Q6：可以继续改进的方向</strong></p>
+<ul>
+<li>把 <code>MAX_LEN</code> 调大（比如 50+），观察正弦位置编码的外推能力；</li>
+<li>尝试 <strong>Pre-LN</strong>（LayerNorm 放在子层之前），训练更稳定，可以去掉 warmup；</li>
+<li>实现 beam search 解码；</li>
+<li>换成可学习的位置 embedding，对比效果；</li>
+<li>用 <code>nn.Transformer</code> 或 <code>F.scaled_dot_product_attention</code> 对照验证自己手写的实现。</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Attention/" class="category-chain-item">Attention</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/MultiHeadAttention/" class="print-no-link">#MultiHeadAttention</a>
+      
+        <a href="/tags/Transformer/" class="print-no-link">#Transformer</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>从零实现Transformer做列表翻转</div>
+      <div>https://huan-yin.github.io/2026/04/11/从零实现Transformer做列表翻转/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>李相越</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年4月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/04/14/FLUX-1-dev%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/" title="FLUX.1-dev架构分析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">FLUX.1-dev架构分析</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/04/09/%E6%89%8B%E6%92%95DiT/" title="手撕DiT">
+                        <span class="hidden-mobile">手撕DiT</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+  
+  
+
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  
+<script src="/js/custom.js"></script>
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
