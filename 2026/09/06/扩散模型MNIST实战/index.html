@@ -28,7 +28,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://huan-yin.github.io/img/%E6%89%A9%E6%95%A3%E6%A8%A1%E5%9E%8BMNIST%E5%AE%9E%E6%88%98.png">
 <meta property="article:published_time" content="2026-09-06T15:11:03.000Z">
-<meta property="article:modified_time" content="2026-09-06T15:31:48.493Z">
+<meta property="article:modified_time" content="2026-09-06T15:35:15.589Z">
 <meta property="article:author" content="李相越">
 <meta property="article:tag" content="DiT">
 <meta property="article:tag" content="Flow Matching">
@@ -440,9 +440,9 @@
 <li><a href="#18-%E4%BB%A3%E7%A0%81%E4%B8%8E%E5%85%AC%E5%BC%8F%E7%9A%84%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BBmini-flux">18. 代码与公式的对应关系（Mini FLUX）</a></li>
 </ul>
 </li>
-<li><a href="#19-%E4%B8%89%E4%BB%A3%E5%AE%9E%E7%8E%B0%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94">19. 三代实现横向对比</a></li>
-<li><a href="#20-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%B0%83%E4%BC%98%E6%96%B9%E5%90%91">20. 常见问题与调优方向</a></li>
-<li><a href="#21-%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE">21. 参考文献</a></li>
+<li><a href="#%E4%B8%89%E4%BB%A3%E5%AE%9E%E7%8E%B0%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94">三代实现横向对比</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%B0%83%E4%BC%98%E6%96%B9%E5%90%91">常见问题与调优方向</a></li>
+<li><a href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE">参考文献</a></li>
 </ul>
 <hr>
 <h1 id="第一部分：ddpm-与-ddim">第一部分：DDPM 与 DDIM</h1>
@@ -1496,7 +1496,7 @@ c-10,0,-16.667,5,-20,15z M410 15 H367 v585 v0 v585 h43z"/></svg></span></span></
 </tbody>
 </table>
 <hr>
-<h1 id="19.-三代实现横向对比">19. 三代实现横向对比</h1>
+<h1 id="三代实现横向对比">三代实现横向对比</h1>
 <p>三部分实现共享同一 MNIST 实验平台，每一代只改动少量组件，便于对照学习：</p>
 <table>
 <thead>
@@ -1593,7 +1593,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <li><strong>把 mini_flux 的 MMDiT 换回 CondUNet</strong>（保持 Flow Matching 不变）：隔离&quot;训练目标&quot;与&quot;主干网络&quot;两个变量的贡献。</li>
 </ol>
 <hr>
-<h1 id="20.-常见问题与调优方向">20. 常见问题与调优方向</h1>
+<h1 id="常见问题与调优方向">常见问题与调优方向</h1>
 <p><strong>DDPM/DDIM（第一部分）</strong></p>
 <ol>
 <li><strong>采样速度慢</strong>：DDPM 需要 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mn>1000</mn></mrow><annotation encoding="application/x-tex">T=1000</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1000</span></span></span></span> 步逐步去噪。直接使用第 6 节的 <strong>DDIM</strong>（跳步采样，10~50 步即可），或进一步学习更先进的加速采样器（如 DPM-Solver）。</li>
@@ -1620,7 +1620,7 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <li><strong>更快的采样</strong>：Euler 是一阶方法，换成 Heun/中点法（二阶）可以在更少步数下保持质量，这也是各开源 FLUX pipeline 的常见优化。</li>
 </ol>
 <hr>
-<h1 id="21.-参考文献">21. 参考文献</h1>
+<h1 id="参考文献">参考文献</h1>
 <ul>
 <li>Ho et al., <em>Denoising Diffusion Probabilistic Models</em> (DDPM), NeurIPS 2020</li>
 <li>Song et al., <em>Denoising Diffusion Implicit Models</em> (DDIM), ICLR 2021</li>
@@ -1667,9 +1667,9 @@ M834 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/Stable-Diffusion/" class="print-no-link">#Stable Diffusion</a>
-      
         <a href="/tags/DiT/" class="print-no-link">#DiT</a>
+      
+        <a href="/tags/Stable-Diffusion/" class="print-no-link">#Stable Diffusion</a>
       
         <a href="/tags/Flow-Matching/" class="print-no-link">#Flow Matching</a>
       
